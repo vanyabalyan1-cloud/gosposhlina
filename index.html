@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.50 2026-09-06 aeafa49 5dfe4391b5">
+<meta name="build" content="2.0.52 2026-09-06 b5bbe15 c2ed68ed12">
 <meta name="color-scheme" content="light dark">
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает без сервера, ничего не отправляет.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
@@ -435,7 +435,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.50", дата:"2026-09-06", коммит:"aeafa49", сумма:"5dfe4391b5"};
+const СБОРКА = {версия:"2.0.52", дата:"2026-09-06", коммит:"b5bbe15", сумма:"c2ed68ed12"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -12942,7 +12942,12 @@ function render(){
 
     // — обращение —
     const о = обращение();
-    if(document.activeElement !== $("#appeal")) $("#appeal").value = поВетке(о.назв, ветка());
+    // Поле readonly: печатать в него нельзя, защищать нечего — значение пишем всегда.
+    // Списки гасят mousedown, чтобы не закрыться раньше выбора, поэтому после выбора
+    // фокус остаётся на поле; проверка «не в фокусе» оставляла бы в нём старый вид
+    // обращения до тех пор, пока пользователь не уйдёт с поля.
+    const пВид = $("#appeal");
+    if(пВид.readOnly || document.activeElement !== пВид) пВид.value = поВетке(о.назв, ветка());
     // значок «?» у подписи — только там, где виду обращения есть что пояснить
     $("#f-appeal .lbl").innerHTML = `Вид обращения${о.помощь ? ` <button type="button" class="q-icon" data-help="${экр(о.помощь)}" aria-label="Пояснение">?</button>` : ""}`;
     // — требования —
