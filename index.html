@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.52 2026-09-06 b5bbe15 c2ed68ed12">
+<meta name="build" content="2.0.60 2026-09-06 7e74c27 b65085332e">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает без сервера, ничего не отправляет.">
+<meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
 
 <style>
@@ -264,6 +264,26 @@ details.more>div{padding-top:var(--s3)}
   .recent{margin:0;padding-left:0;padding-right:0}
 }
 
+/* ─── широкий экран: форма в две колонки, чтобы всё умещалось без прокрутки ───
+   Замер 06.09.2026 при 1920×1080: страница была 1351 px при доступных ~890.
+   Справка справа и так прокручивается внутри себя и высоту страницы не задаёт,
+   поэтому режем только форму: 1083 px в одну колонку → около 575 в две.
+   Порог 1400 px: две колонки полей примерно по 390 px плюс справка 480 px и отступы. */
+@media (min-width: 1400px){
+  #form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 32px;align-items:start}
+  .fcol{min-width:0}
+  .fcol .q:first-child{border-top:0;padding-top:var(--s2)}
+  .app{padding-bottom:16px}
+  .top{padding:8px 0 2px}
+  .top .intro{font-size:13px;line-height:18px;max-width:none}
+  .foot{padding-top:12px;max-width:none}
+  /* Справка не тянет страницу ниже экрана. Когда окно низкое, внутри себя ездит
+     только лист справки — кнопки выдачи остаются на месте. */
+  .result{max-height:calc(100vh - 190px);overflow:visible;display:flex;flex-direction:column}
+  .result .actions{flex:none}
+  .sheet{flex:1 1 auto;min-height:0;overflow:auto}
+}
+
 /* ─── печать: только справка ─── */
 @media print{
   @page{size:A4;margin:0}
@@ -309,6 +329,8 @@ details.more>div{padding-top:var(--s3)}
 
   <div class="cols">
   <section class="form no-print" id="form">
+    <!-- на широком экране колонки идут рядом, на узком — друг под другом -->
+    <div class="fcol" id="fcol-left">
 
     <!-- ── Суд ── -->
     <div class="q" id="q-court">
@@ -349,6 +371,9 @@ details.more>div{padding-top:var(--s3)}
         </div>
       </details>
     </div>
+
+    </div>
+    <div class="fcol" id="fcol-right">
 
     <!-- ── Плательщик и стороны ── -->
     <div class="q" id="q-payer">
@@ -398,6 +423,7 @@ details.more>div{padding-top:var(--s3)}
       </details>
     </div>
 
+    </div>
   </section>
 
   <!-- ═══ результат ═══ -->
@@ -435,7 +461,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.52", дата:"2026-09-06", коммит:"b5bbe15", сумма:"c2ed68ed12"};
+const СБОРКА = {версия:"2.0.60", дата:"2026-09-06", коммит:"7e74c27", сумма:"b65085332e"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -12310,21 +12336,106 @@ function имяФайла(расш){
   return `Госпошлина ${форматЦены(к.итог)} ${кто} ${датаРус(S.датаРасчёта || сегодняISO())}.${расш}`;
 }
 
+/** Телефон или планшет: палец вместо мыши. На компьютере системное «Поделиться»
+ *  открывать нельзя — Chrome под Windows отвечает, что умеет делиться файлами, а
+ *  окно обмена не открывается («Не удалось отобразить все способы предоставления
+ *  общего доступа»), и файл не сохраняется вовсе (замечание Ивана 06.09.2026). */
+function этоТелефон(){
+  try{ return matchMedia("(pointer: coarse)").matches && (navigator.maxTouchPoints || 0) > 0; }
+  catch(e){ return false; }
+}
+/** Скачать файл в загрузки */
+function скачатьФайл(blob, имя, сообщение){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = имя; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);
+  toast(сообщение);
+}
+/** Отдать готовый файл: на телефоне — «Поделиться», на компьютере — скачать.
+ *  В «Поделиться» кладём только файл: заголовок Telegram подставляет отдельным
+ *  сообщением к картинке (замечание Ивана 06.09.2026). */
+async function отдатьФайл(blob, имя, тип, сообщение){
+  const file = new File([blob], имя, {type:тип});
+  if(этоТелефон() && navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file]}); return; }
+    catch(e){ if(e && e.name === "AbortError") return; }   // человек закрыл окно — не навязываем скачивание
+  }
+  скачатьФайл(blob, имя, сообщение);
+}
+
 async function сохранитьКартинку(){
   const cv = собратьКартинку();
   const blob = await new Promise(res => cv.toBlob(res, "image/png"));
   if(!blob){ toast("Не удалось собрать картинку"); return; }
-  const file = new File([blob], имяФайла("png"), {type:"image/png"});
   сохранитьВИсторию();
-  // телефон: системное «Поделиться» с файлом (Telegram, WhatsApp, Почта, Файлы)
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    try{ await navigator.share({files:[file], title:"Справка по оплате госпошлины"}); return; }
-    catch(e){ if(e && e.name === "AbortError") return; }
+  await отдатьФайл(blob, имяФайла("png"), "image/png", "Картинка сохранена в загрузки");
+}
+
+/* ——— PDF ———
+   Собираем файл сами, а не печатью браузера: на телефоне печать даёт то диалог,
+   то ничего, и PDF не получался вовсе (замечание Ивана 06.09.2026). Внутри —
+   та же картинка справки во всю страницу А4, поэтому вид на всех устройствах
+   одинаковый. Печать остаётся запасным путём, если собрать файл не вышло. */
+
+/** Сжать байты алгоритмом deflate средствами браузера (для /FlateDecode).
+ *  CompressionStream("deflate") даёт поток zlib — ровно то, что ждёт PDF. */
+async function сжатьDeflate(bytes){
+  if(typeof CompressionStream === "undefined") return null;
+  try{
+    const поток = new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate"));
+    return new Uint8Array(await new Response(поток).arrayBuffer());
+  }catch(e){ return null; }
+}
+
+/** Одностраничный PDF (А4) с картинкой справки. Возвращает Blob или null. */
+async function собратьPDF(){
+  const cv = собратьКартинку();
+  const W = cv.width, H = cv.height;
+  // без потерь: сырой RGB + deflate. QR в JPEG мог бы пострадать, поэтому сжатие
+  // без потерь — основной путь, а JPEG остаётся только для старых браузеров.
+  const rgba = cv.getContext("2d").getImageData(0, 0, W, H).data;
+  const rgb = new Uint8Array(W*H*3);
+  for(let i = 0, j = 0; i < rgba.length; i += 4, j += 3){ rgb[j] = rgba[i]; rgb[j+1] = rgba[i+1]; rgb[j+2] = rgba[i+2]; }
+  let данные = await сжатьDeflate(rgb), фильтр = "/FlateDecode";
+  if(!данные){
+    const jb = await new Promise(res => cv.toBlob(res, "image/jpeg", 0.95));
+    if(!jb) return null;
+    данные = new Uint8Array(await jb.arrayBuffer()); фильтр = "/DCTDecode";
   }
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href = url; a.download = file.name; document.body.appendChild(a); a.click();
-  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);
-  toast("Картинка сохранена в загрузки");
+  const ШИР = 595.28, ВЫС = 841.89;                       // А4 в пунктах
+  const k = Math.min(ШИР / W, ВЫС / H);
+  const sw = W*k, sh = H*k, x = (ШИР - sw)/2, y = (ВЫС - sh)/2;
+  const байты = s => { const u = new Uint8Array(s.length); for(let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i) & 255; return u; };
+  const части = [], смещения = []; let длина = 0;
+  const пиши = u8 => { части.push(u8); длина += u8.length; };
+  const пишиТекст = s => пиши(байты(s));
+  const объект = (n, тело, поток) => {
+    смещения[n] = длина;
+    пишиТекст(`${n} 0 obj\n${тело}\n`);
+    if(поток){ пишиТекст("stream\n"); пиши(поток); пишиТекст("\nendstream\n"); }
+    пишиТекст("endobj\n");
+  };
+  пишиТекст("%PDF-1.4\n"); пиши(new Uint8Array([37, 226, 227, 207, 211, 10]));   // двоичная метка
+  const содержимое = байты(`q\n${sw.toFixed(2)} 0 0 ${sh.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm\n/Im0 Do\nQ\n`);
+  объект(1, "<< /Type /Catalog /Pages 2 0 R >>");
+  объект(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
+  объект(3, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${ШИР} ${ВЫС}] /Resources << /XObject << /Im0 5 0 R >> /ProcSet [/PDF /ImageC] >> /Contents 4 0 R >>`);
+  объект(4, `<< /Length ${содержимое.length} >>`, содержимое);
+  объект(5, `<< /Type /XObject /Subtype /Image /Width ${W} /Height ${H} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter ${фильтр} /Length ${данные.length} >>`, данные);
+  const началоXref = длина;
+  let xref = "xref\n0 6\n0000000000 65535 f \n";
+  for(let n = 1; n <= 5; n++) xref += String(смещения[n]).padStart(10, "0") + " 00000 n \n";
+  xref += `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${началоXref}\n%%EOF\n`;
+  пишиТекст(xref);
+  return new Blob(части, {type:"application/pdf"});
+}
+
+async function сохранитьPDF(){
+  сохранитьВИсторию();
+  let blob = null;
+  try{ blob = await собратьPDF(); }catch(e){ blob = null; }
+  if(!blob){ window.print(); return; }                    // запасной путь
+  await отдатьФайл(blob, имяФайла("pdf"), "application/pdf", "PDF сохранён в загрузки");
 }
 
 /* ——— история на устройстве ——— */
@@ -13239,7 +13350,7 @@ function привязать(){
   $("#purpose").addEventListener("blur", () => render());
   // выдача
   // кнопки серые (без disabled — иначе не показывается подсказка на обёртке), поэтому готовность проверяем и здесь
-  $("#btn-pdf").addEventListener("click", () => { if(!готово(неХватает())) return; сохранитьВИсторию(); window.print(); });
+  $("#btn-pdf").addEventListener("click", () => { if(!готово(неХватает())) return; if(typeof сохранитьPDF === "function") сохранитьPDF(); else { сохранитьВИсторию(); window.print(); } });
   $("#btn-image").addEventListener("click", () => { if(!готово(неХватает())) return; if(typeof сохранитьКартинку === "function") сохранитьКартинку(); });
   $("#sticky-go").addEventListener("click", () => $("#sheet").scrollIntoView({behavior:"smooth", block:"start"}));
   $("#sticky-sum").addEventListener("click", () => $("#sheet").scrollIntoView({behavior:"smooth", block:"start"}));
@@ -13273,7 +13384,7 @@ function заполнитьПоля(){
 }
 function рисоватьПодвал(){
   const статьи = ["333.19","333.20","333.21","333.22","333.36","333.37"].map(n => ссылка(n, "ст. " + n)).join(", ");
-  $("#foot").innerHTML = `<p>Сборка ${экр(СБОРКА.версия)} · сведения о ставках, льготах и реквизитах актуальны на ${экр(датаСловами(СБОРКА.дата))} (ставки и льготы сверены с НК РФ ${экр(датаСловами(ПРАВО.сверено))}, реквизиты ФНС — ${экр(датаСловами(ФНС.сверено))}, база судов — ${экр(датаСловами(СУДЫ_СВЕДЕНИЯ.собрано))}). Файл ничего не отправляет в сеть; введённое хранится только на этом устройстве.</p>
+  $("#foot").innerHTML = `<p>Сборка ${экр(СБОРКА.версия)} · сведения о ставках, льготах и реквизитах актуальны на ${экр(датаСловами(СБОРКА.дата))} (ставки и льготы сверены с НК РФ ${экр(датаСловами(ПРАВО.сверено))}, реквизиты ФНС — ${экр(датаСловами(ФНС.сверено))}, база судов — ${экр(датаСловами(СУДЫ_СВЕДЕНИЯ.собрано))}). Работает локально, данные хранятся на вашем устройстве.</p>
     <p>Источники: ${статьи} НК РФ в редакции Федерального закона от 20.02.2026 № 40-ФЗ; ${ссылка("пленум39", "постановление Пленума ВС РФ от 23.12.2025 № 39")}.</p>
     <p>По вопросам и пожеланиям к работе сервиса: <a href="mailto:vanyabalyan@mail.ru">vanyabalyan@mail.ru</a></p>`;
 }
@@ -13298,6 +13409,7 @@ function старт(){
 
 window.__гп = {S, render, рассчитать, расчёт, поШкале, собратьНазначение, назначение, собратьPayload, вРодительном, судВТворительном, фиоВПадеже,
                статусПоИмени, разборЦены, сегодняISO, искатьСуды, установитьСуд, установитьОбращение, qrEncode, toCp1251,
+               собратьКартинку, собратьPDF, этоТелефон,
                ПРАВО, ОБРАЩЕНИЯ, СУДЫ, ФНС, ВЕТКИ, СБОРКА, ПАМЯТЬ, ССЫЛКИ, runSelfTest, ТЕСТЫ, проверитьРеквизиты, проверитьСуды};
 
 document.addEventListener("DOMContentLoaded", старт);
