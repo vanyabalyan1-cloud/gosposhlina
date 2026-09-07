@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.69 2026-09-07 aa2541e 433c46889c">
+<meta name="build" content="2.0.82 2026-09-07 dbc40f6 2f06515ead">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
@@ -64,15 +64,21 @@ a{color:var(--accent)}
 .foot p{margin:0 0 4px}
 .foot a{color:var(--ink-2);text-decoration:underline}
 
-/* недавние */
-.recent{display:flex;gap:var(--s2);overflow-x:auto;padding:6px 0 10px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
-.recent::-webkit-scrollbar{display:none}
-.recent .lbl{flex:none;align-self:center;color:var(--ink-3);font-size:13px;margin:0}
-.recent .rc{flex:none;display:flex;align-items:stretch;border:1px solid var(--line);border-radius:var(--r2);background:var(--card);overflow:hidden;max-width:320px}
-.recent .rc>button{border:0;background:transparent;text-align:left;padding:8px 12px;font-size:14px;line-height:18px;min-width:0}
-.recent .rc>button.main b{display:block;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.recent .rc>button.main span{color:var(--ink-3);font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.recent .rc>button:hover{background:var(--field)}
+/* недавние — кнопка справа от заголовка, список во всплывающей панели (Иван 07.09.2026) */
+.top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.recent-wrap{position:relative;flex:none}
+.recent-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:60;width:min(380px,calc(100vw - 32px));
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r2);box-shadow:0 10px 30px rgba(17,20,24,.14);
+  padding:4px;max-height:min(60vh,440px);overflow:auto}
+.recent-pop .rc{display:block;border-bottom:1px solid var(--line)}
+.recent-pop .rc:last-of-type{border-bottom:0}
+.recent-pop .rc>button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:9px 12px;font-size:14px;line-height:18px;min-width:0}
+.recent-pop .rc>button b{display:block;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent-pop .rc>button span{color:var(--ink-3);font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent-pop .rc>button:hover{background:var(--field)}
+.recent-pop .rp-foot{display:flex;justify-content:flex-end;border-top:1px solid var(--line);margin-top:4px;padding-top:4px}
+.recent-pop .rp-foot button{border:0;background:none;color:var(--ink-3);font-size:13px;padding:6px 12px;text-decoration:underline}
+.recent-pop .rp-foot button:hover{color:var(--ink)}
 
 /* блоки */
 .q{padding:var(--s3) 0 var(--s4);border-top:0}
@@ -179,7 +185,7 @@ textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:vertical;line-h
 
 /* назначение и кнопки */
 .purpose-note{margin-top:8px;padding:7px 10px;border-radius:6px;font-size:13px;line-height:18px;background:var(--need-soft);border:1px solid #e6d3a8;color:var(--need)}
-.actions{display:flex;gap:var(--s2);flex-wrap:wrap;margin:0 0 var(--s4)}
+.actions{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s3) 0 0}
 .btn-wrap{display:inline-flex}
 .btn{min-height:44px;padding:0 22px;border-radius:4px;border:1px solid var(--line);background:transparent;color:var(--ink);font-weight:500;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .btn:hover{background:var(--accent-soft)}
@@ -196,9 +202,9 @@ details.more[open]>summary::before{transform:rotate(90deg)}
 details.more>div{padding-top:var(--s3)}
 
 /* ─── справка — документ для клиента (всегда светлая) ─── */
-.sheet{background:#fff;color:#111418;border:0;border-radius:0;padding:20px 22px 20px;font-size:14px;line-height:20px}
-.sheet .reqs{font-size:12px;line-height:16px;color:#8a9099;letter-spacing:.06em;text-transform:uppercase;margin:0 0 10px}
-.sheet .tail{display:flex;gap:18px;align-items:center;margin-top:24px;padding-top:20px;border-top:1px solid #ececea}
+.sheet{background:#fff;color:#111418;border:0;border-radius:0;padding:18px 20px;font-size:14px;line-height:20px}
+.sheet .reqs{font-size:12px;line-height:16px;color:#8a9099;letter-spacing:.06em;text-transform:uppercase;margin:0 0 6px}
+.sheet .tail{display:flex;gap:18px;align-items:center;margin-top:10px;padding-top:12px;border-top:1px solid #ececea}
 /* заголовок и дата нужны только на печати: на экране сумма говорит сама за себя */
 .sheet .h{display:none;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
 .sheet .h h3{font-size:22px;line-height:28px;font-weight:600;margin:0}
@@ -207,7 +213,11 @@ details.more>div{padding-top:var(--s3)}
 .sheet .who div{margin-bottom:2px}
 .sheet .who b{color:#111418;font-weight:600}
 .sheet .ph{color:#9ca3af}
-.sheet .pay{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:0 0 18px;border:0;border-bottom:1px solid #111418;border-radius:0;margin-bottom:22px}
+/* сумма слева, QR справа — одной строкой наверху справки (Иван 07.09.2026) */
+.sheet .paywrap{display:flex;align-items:flex-start;gap:16px;border-bottom:1px solid #111418;padding-bottom:12px;margin-bottom:14px}
+.sheet .paywrap .pay{flex:1 1 auto;min-width:0;border:0;padding:0;margin:0}
+.sheet .paywrap .qrblock{flex:none;text-align:center}
+.sheet .pay{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:0 0 12px;border:0;border-bottom:1px solid #111418;border-radius:0;margin-bottom:16px}
 .sheet .pay .s{font-size:40px;line-height:44px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .sheet .pay .s.ph{font-size:20px;line-height:26px;font-weight:500}
 .sheet .pay .s small{display:block;font-size:14px;line-height:20px;font-weight:400;color:#4b5563;margin-top:4px}
@@ -216,21 +226,38 @@ details.more>div{padding-top:var(--s3)}
 .sheet .pay .s small{display:inline;font-size:14px;font-weight:400;color:#6b7280;margin-left:8px}
 .sheet .pay .due{color:#8a9099;font-size:13px}
 .sheet .qrblock{border:0;border-radius:0;padding:0;text-align:left;margin:0;flex:none}
-.sheet .qrblock svg{display:block;margin:0;width:118px;height:118px;max-width:100%}
+.sheet .qrblock svg{display:block;margin:0;width:92px;height:92px;max-width:100%}
 .sheet .qrblock .cap{font-size:12px;line-height:16px;color:#8a9099;margin-top:6px}
 .claim-row .subj-wrap{margin-top:var(--s2)}
 .claim-row .under.norm{margin-top:6px}
 .sheet .org{padding:12px 14px;background:#f3f4f6;border-radius:var(--r);color:#4b5563;margin-bottom:16px}
 .sheet h4{font-size:16px;line-height:24px;font-weight:600;margin:0 0 6px}
-.sheet table{width:100%;border-collapse:collapse;margin-bottom:14px}
-.sheet td{padding:6px 0;border-bottom:0;vertical-align:top}
+/* реквизиты на экране плотнее основного текста — иначе справка не умещается
+   в окно ноутбука. В картинке и PDF свои размеры: они рисуются на canvas. */
+.sheet table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:13px;line-height:17px}
+.sheet td{padding:3px 0;border-bottom:0;vertical-align:top}
 .sheet td.k{color:#8a9099;width:40%;padding-right:12px}
+/* пара коротких реквизитов в одной строке: ИНН/КПП, БИК/ОКТМО */
+.sheet tr.duo td.k{width:auto;white-space:nowrap}
+.sheet tr.duo td.k:nth-child(3){padding-left:16px}
 .sheet td.v{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .sheet td.v.num{font-variant-numeric:tabular-nums}
 .sheet tr:last-child td{border-bottom:0}
 .sheet .grp td{border-bottom:0;padding-top:10px;color:#111418;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.04em}
-.sheet .notes{color:#8a9099;font-size:13px;line-height:19px;flex:1 1 0;min-width:0}
+.sheet .notes{color:#8a9099;font-size:12px;line-height:17px;flex:1 1 0;min-width:0}
 .sheet .notes p{margin:0 0 6px}
+/* Узкий экран: сумма и QR в одну строку не помещаются — ставим друг под друга.
+   Порог 700 px, а не 480: на 480-600 сумма 40 px + QR 92 px уже жмут друг друга. */
+@media (max-width:700px){
+  .sheet .paywrap{flex-direction:column;align-items:flex-start;gap:12px}
+  .sheet .paywrap .qrblock{align-self:flex-start;text-align:left}
+  /* пары ИНН/КПП и БИК/ОКТМО на узком экране рассыпаются на цифры —
+     разводим их обратно по своим строкам */
+  .sheet tr.duo{display:grid;grid-template-columns:40% 1fr}
+  .sheet tr.duo td{display:block}
+  .sheet tr.duo td.k{white-space:normal;padding-left:0}
+  .sheet tr.duo td.k:nth-child(3){padding-left:0}
+}
 @media (max-width:480px){
   .sheet{padding:16px 14px}
   .sheet td.k{width:40%}
@@ -262,7 +289,6 @@ details.more>div{padding-top:var(--s3)}
   .result{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;padding-right:2px}
   .stickybar{display:none}
   :root{--field-h:40px}
-  .recent{margin:0;padding-left:0;padding-right:0}
 }
 
 /* ─── широкий экран: форма в две колонки, чтобы всё умещалось без прокрутки ───
@@ -274,15 +300,18 @@ details.more>div{padding-top:var(--s3)}
   #form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 32px;align-items:start}
   .fcol{min-width:0}
   .fcol .q:first-child{border-top:0;padding-top:var(--s2)}
-  .app{padding-bottom:16px}
+  .app{padding-bottom:8px}
   .top{padding:8px 0 2px}
   .top .intro{font-size:13px;line-height:18px;max-width:none}
-  .foot{padding-top:12px;max-width:none}
+  /* подвал — справочный текст: на широком экране он мельче, чтобы страница
+     умещалась в окно ноутбука целиком (замечание Ивана 4 от 07.09.2026) */
+  .foot{padding-top:8px;max-width:none;font-size:11px;line-height:16px}
+  .result .actions{margin-top:var(--s2)}
   /* Справка не тянет страницу ниже экрана. Когда окно низкое, внутри себя ездит
      только лист справки — кнопки выдачи остаются на месте. */
-  .result{max-height:calc(100vh - 190px);overflow:visible;display:flex;flex-direction:column}
+  .result{max-height:calc(100vh - 32px);overflow:visible;display:flex;flex-direction:column}
   .result .actions{flex:none}
-  .sheet{flex:1 1 auto;min-height:0;overflow:auto}
+  .sheet{flex:0 1 auto;min-height:0;overflow:auto}
 }
 
 /* ─── печать: только справка ─── */
@@ -325,11 +354,17 @@ details.more>div{padding-top:var(--s3)}
 
 <div class="app" id="app">
   <div class="top no-print">
-    <h1>Госпошлина в суд</h1>
+    <div class="top-row">
+      <h1>Госпошлина в суд</h1>
+      <!-- Недавние справки свёрнуты в кнопку (Иван 07.09.2026): место экономится,
+           список раскрывается по щелчку и там же «Очистить». -->
+      <div class="recent-wrap" id="recent-wrap" hidden>
+        <button type="button" class="btn sm" id="recent-btn" aria-expanded="false" aria-controls="recent">Недавние</button>
+        <div class="recent-pop" id="recent" role="dialog" hidden></div>
+      </div>
+    </div>
     <p class="intro">Данный сервис позволяет рассчитать размер госпошлины за обращение в суд и сформировать справку для оплаты — с реквизитами и QR-кодом.</p>
   </div>
-
-  <div class="recent no-print" id="recent" hidden></div>
 
   <div class="cols">
   <section class="form no-print" id="form">
@@ -384,11 +419,10 @@ details.more>div{padding-top:var(--s3)}
       <div class="fld cb" id="f-payer">
         <label class="lbl" for="payer">Плательщик <button type="button" class="q-icon" data-help="плательщик" aria-label="Пояснение">?</button></label>
         <div class="cards" id="payer-cards">
-          <button type="button" class="card" data-status="физ">Физлицо</button>
-          <button type="button" class="card" data-status="ип">ИП</button>
+          <button type="button" class="card" data-status="физ">Физлицо или ИП</button>
           <button type="button" class="card" data-status="юр">Организация</button>
         </div>
-        <input class="inp" id="payer" placeholder="Иванов Иван Иванович, ИП Петров П.П. или ООО «Ромашка»" autocomplete="off">
+        <input class="inp" id="payer" placeholder="Иванов Иван Иванович" autocomplete="off">
         <div class="box" id="payer-box"></div>
         <div class="under" id="payer-under"></div>
       </div>
@@ -432,11 +466,11 @@ details.more>div{padding-top:var(--s3)}
 
   <!-- ═══ результат ═══ -->
   <aside class="result" id="result">
-    <div class="actions no-print" id="actions">
-      <span class="btn-wrap" id="wrap-image"><button type="button" class="btn primary" id="btn-image">Сохранить изображение</button></span>
-      <span class="btn-wrap" id="wrap-pdf"><button type="button" class="btn" id="btn-pdf">Сохранить PDF</button></span>
-    </div>
+    <!-- Справка начинается сверху, кнопка под ней (Иван 07.09.2026) -->
     <div class="sheet" id="sheet"></div>
+    <div class="actions no-print" id="actions">
+      <span class="btn-wrap" id="wrap-pdf"><button type="button" class="btn primary" id="btn-pdf">Сохранить PDF</button></span>
+    </div>
   </aside>
   </div>
 
@@ -465,7 +499,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.69", дата:"2026-09-07", коммит:"aa2541e", сумма:"433c46889c"};
+const СБОРКА = {версия:"2.0.82", дата:"2026-09-07", коммит:"dbc40f6", сумма:"2f06515ead"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -1278,9 +1312,14 @@ function полПоФИО(части){
   if(/(вна|чна|на)$/.test(отч)) return "ж";
   const имя = (части[1] || "").toLowerCase();
   if(женскоеИмя(имя)) return "ж";
-  return "м";
+  return полПоФамилии(части[0]);
 }
 function женскоеИмя(имя){ return /[ая]$/.test(имя) && !/^(никита|илья|кузьма|фома|лука|савва|данила|гаврила)$/.test(имя); }
+/** Пол по одной фамилии — когда имени и отчества нет: введены инициалы («Иванова М.П.»)
+    или только фамилия. Однозначно женские окончания: -ова/-ева/-ёва/-ина/-ына и
+    прилагательные -ая/-яя. Голое -а/-я не берём: Глинка и Сковорода бывают мужскими.
+    До 07.09.2026 здесь стояло жёсткое «м», и «Иванова М.П.» превращалась в «Ивановы М.П.». */
+function полПоФамилии(ф){ return /(ова|ева|ёва|ина|ына|ая|яя)$/u.test(String(ф || "").toLowerCase()) ? "ж" : "м"; }
 function фамилияВПадеже(w, падеж, пол){
   const l = w.toLowerCase(), e = n => l.slice(-n), род = падеж === "род";
   if(/[оеиуэюы]$/.test(l) && !/[ая]$/.test(l)) return w;                 // Шевченко, Дурново, Гарсиа? — несклоняемые
@@ -1310,10 +1349,10 @@ function фиоВПадеже(полное, падеж){
     return "ИП " + фиоВПадеже(без, падеж);
   }
   const части = t.split(/\s+/);
-  if(части.length === 1) return фамилияВПадеже(части[0], падеж, "м");
+  if(части.length === 1) return фамилияВПадеже(части[0], падеж, полПоФамилии(части[0]));
   // уже с инициалами: «Иванов И.И.» — склоняем только фамилию
   if(/^[А-ЯЁ]\.\s*([А-ЯЁ]\.)?$/.test(части.slice(1).join(" ")) || /^[А-ЯЁ]\.[А-ЯЁ]\.$/.test(части[1] || "")){
-    return фамилияВПадеже(части[0], падеж, "м") + " " + части.slice(1).join("").replace(/\.(?=[А-ЯЁ])/g, ".");
+    return фамилияВПадеже(части[0], падеж, полПоФамилии(части[0])) + " " + части.slice(1).join("").replace(/\.(?=[А-ЯЁ])/g, ".");
   }
   const пол = полПоФИО(части);
   const инициалы = (части[1] ? части[1][0] + "." : "") + (части[2] ? части[2][0] + "." : "");
@@ -12328,7 +12367,7 @@ function собратьКартинку(){
     строка("Счёт банка (ЕКС)", ФНС.корсчёт, true);
     строка("КБК", с ? ВЕТКИ[с.ветка].кбк : "—", true);
     строка("ОКТМО", с && с.октмо ? с.октмо : "—", true);
-    строка("Плательщик", [S.плательщик, S.соистецВкл ? S.соистец : ""].filter(Boolean).join(", ") || "—");
+    строка("Плательщик", S.плательщик || "—");   // платит один; соистец — только в назначении
     строка("Назначение платежа", назн || "—");
     y += 20;
     // сумма и срок
@@ -12391,14 +12430,6 @@ async function отдатьФайл(blob, имя, тип, сообщение){
     catch(e){ if(e && e.name === "AbortError") return; }   // человек закрыл окно — не навязываем скачивание
   }
   скачатьФайл(blob, имя, сообщение);
-}
-
-async function сохранитьКартинку(){
-  const cv = собратьКартинку();
-  const blob = await new Promise(res => cv.toBlob(res, "image/png"));
-  if(!blob){ toast("Не удалось собрать картинку"); return; }
-  сохранитьВИсторию();
-  await отдатьФайл(blob, имяФайла("png"), "image/png", "Картинка сохранена в загрузки");
 }
 
 /* ——— PDF ———
@@ -12482,19 +12513,41 @@ function записатьИсторию(){
   ПАМЯТЬ.положить("history", JSON.stringify(список.slice(0, 8)));
   рисоватьНедавние();
 }
+/** Недавние справки: кнопка справа от заголовка, список — во всплывающей панели.
+ *  Решение Ивана 07.09.2026: полоса карточек занимала место наверху экрана; теперь
+ *  её видно только по щелчку, там же «Очистить». */
 function рисоватьНедавние(){
-  const el = $("#recent"); if(!el) return;
-  const список = ПАМЯТЬ.включена() ? ПАМЯТЬ.json("history", []) : [];
-  el.hidden = список.length === 0;
-  el.innerHTML = список.length ? `<span class="lbl">Недавние:</span>` : "";
+  const el = $("#recent"), обёртка = $("#recent-wrap"); if(!el || !обёртка) return;
+  const список = (ПАМЯТЬ.включена() ? ПАМЯТЬ.json("history", []) : []).filter(h => судПоId(h.судId));
+  обёртка.hidden = список.length === 0;
+  if(!список.length){ закрытьНедавние(); el.innerHTML = ""; return; }
+  el.innerHTML = "";
   for(const h of список){
-    const с = судПоId(h.судId); if(!с) continue;
+    const с = судПоId(h.судId);
     const d = document.createElement("div"); d.className = "rc";
     const кто = экр((h.плательщик || "").split(/\s+/).slice(0, statusWords(h.плательщик)).join(" "));
     d.innerHTML = `<button type="button" class="main" title="Восстановить всё, дата — сегодня"><b>${кто}${h.ответчик ? " → " + экр(h.ответчик) : ""}</b><span>${экр(с.наименование.replace(" города Москвы", ""))} · ${рубТочно(h.сумма)} · ${датаРус(h.когда).slice(0, 5)} · <u>Повторить</u></span></button>`;
-    d.querySelector(".main").addEventListener("click", () => восстановить(h));
+    d.querySelector(".main").addEventListener("click", () => { закрытьНедавние(); восстановить(h); });
     el.appendChild(d);
   }
+  const низ = document.createElement("div"); низ.className = "rp-foot";
+  низ.innerHTML = `<button type="button" id="recent-clear">Очистить</button>`;
+  низ.querySelector("button").addEventListener("click", () => {
+    ПАМЯТЬ.положить("history", "[]");
+    закрытьНедавние(); рисоватьНедавние(); toast("Недавние справки очищены");
+  });
+  el.appendChild(низ);
+}
+function закрытьНедавние(){
+  const el = $("#recent"), b = $("#recent-btn");
+  if(el) el.hidden = true;
+  if(b) b.setAttribute("aria-expanded", "false");
+}
+function переключитьНедавние(){
+  const el = $("#recent"), b = $("#recent-btn"); if(!el || !b) return;
+  const откроем = el.hidden;
+  el.hidden = !откроем;
+  b.setAttribute("aria-expanded", откроем ? "true" : "false");
 }
 function statusWords(имя){ return статусПоИмени(имя) === "юр" ? 2 : 1; }
 function восстановить(h){
@@ -12639,6 +12692,14 @@ const ТЕСТЫ_ФИО = [
   ["Гоголь Николай Васильевич", "род", "Гоголя Н.В."],
   ["Глинка Михаил Иванович", "род", "Глинки М.И."],
   ["Петров И.И.", "род", "Петрова И.И."],
+  // Женская фамилия с инициалами: пол берётся из окончания фамилии.
+  // До 07.09.2026 получалось «Ивановы М.П.» и «Кузнецове А.В.» (замечание Ивана 5).
+  ["Иванова М.П.", "род", "Ивановой М.П."],
+  ["Иванова М.П.", "дат", "Ивановой М.П."],
+  ["Кузнецова А.В.", "дат", "Кузнецовой А.В."],
+  ["Толстая С.А.", "род", "Толстой С.А."],
+  ["Иванова", "род", "Ивановой"],
+  ["Глинка М.И.", "род", "Глинки М.И."],
   ["ИП Сидоров Пётр Петрович", "род", "ИП Сидорова П.П."],
   ["ООО «Ромашка»", "род", "ООО «Ромашка»"]
 ];
@@ -12796,7 +12857,15 @@ const СТАТУС_НАЗВ = {"физ":"физического лица", "ип
 const суд = () => S.судId ? судПоId(S.судId) : null;
 const ветка = () => { const с = суд(); return с ? с.ветка : "СОЮ"; };
 const каталог = () => каталогВетки(ветка());
-const статус = () => S.статус || статусПоИмени(S.плательщик) || "физ";
+/* «Физлицо или ИП» — одна карточка (Иван 07.09.2026): ставки у них совпадают,
+   п. 3 постановления Пленума ВС РФ № 39. Выбор карточки не должен стирать признак
+   ИП: он нужен для пометки «расчёт как для предпринимателя» и приставки «ИП»
+   в назначении платежа, поэтому при карточке «физ» ИП по-прежнему узнаём по имени. */
+const статус = () => {
+  const авто = статусПоИмени(S.плательщик);
+  if(S.статус === "физ") return авто === "ип" ? "ип" : "физ";
+  return S.статус || авто || "физ";
+};
 function обращение(){
   const список = обращенияВетки(ветка());
   return список.find(o => o.id === S.обращение) || список[0];
@@ -12966,6 +13035,12 @@ document.addEventListener("mouseover", e => {
 document.addEventListener("keydown", e => { if(e.key === "Escape") скрытьПодсказку(); });
 // списки валют закрываются кликом вне (один обработчик на страницу, не на каждое поле)
 document.addEventListener("click", e => { if(!e.target.closest(".cur-box") && !e.target.closest(".cur-btn")) $$(".cur-box.open").forEach(b => b.classList.remove("open")); });
+// панель «Недавние» закрывается щелчком вне неё и по Escape
+document.addEventListener("click", e => {
+  if(e.target.closest("#recent-btn") || e.target.closest("#recent")) return;
+  if(typeof закрытьНедавние === "function") закрытьНедавние();
+});
+document.addEventListener("keydown", e => { if(e.key === "Escape" && typeof закрытьНедавние === "function") закрытьНедавние(); });
 
 /* ═══ ИНТЕРФЕЙС ═══ */
 function toast(t){ const el = $("#toast"); el.textContent = t; el.classList.add("show"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("show"), 2200); }
@@ -13108,7 +13183,11 @@ function render(){
     // — плательщик —
     const авто = статусПоИмени(S.плательщик);
     const естьПлательщик = !!S.плательщик.trim() || !!S.статус;
-    $$("#payer-cards .card").forEach(b => { b.classList.toggle("on", естьПлательщик && b.dataset.status === ст); b.classList.toggle("auto", !S.статус && авто === b.dataset.status && !!S.плательщик.trim()); });
+    // «Физлицо или ИП» — одна карточка: ставки у них совпадают (п. 3 Пленума № 39).
+    const карточка = х => х === "ип" ? "физ" : х;
+    $$("#payer-cards .card").forEach(b => { b.classList.toggle("on", естьПлательщик && b.dataset.status === карточка(ст)); b.classList.toggle("auto", !S.статус && карточка(авто) === b.dataset.status && !!S.плательщик.trim()); });
+    // 5. образец в поле — под выбранный вид плательщика (Иван 07.09.2026)
+    $("#payer").placeholder = карточка(ст) === "юр" ? "ООО «Успех»" : "Иванов Иван Иванович";
     $("#payer-under").innerHTML = S.плательщик.trim()
       ? `<span class="v">Расчёт произведён как для ${СТАТУС_НАЗВ[ст]}${ст === "ип" ? ` — по ставкам для физических лиц <button type="button" class="q-icon" data-help="ип" aria-label="Пояснение">?</button>` : ""}. В назначении: ${экр(истецТекст())}</span>
          <button type="button" class="lnk" id="co-toggle">${S.соистецВкл ? "убрать соистца" : "+ соистец"}</button>`
@@ -13281,7 +13360,7 @@ function готово(нх){ const с = суд(); return нх.length === 0 && с
 function рисоватьКнопки(к, нх, с){
   const ok = готово(нх);
   const почему = нх.length ? "Укажите: " + нх.map(n => ИМЕНА_НЕХВАТКИ[n]).join(", ") : (с && !с.сверено ? "Реквизиты этого суда не сверены — справка не выдаётся" : "");
-  for(const id of ["image", "pdf"]){
+  for(const id of ["pdf"]){
     const w = $("#wrap-" + id), b = $("#btn-" + id);
     b.classList.toggle("off", !ok); w.classList.toggle("off", !ok); b.setAttribute("aria-disabled", String(!ok));
     b.tabIndex = ok ? 0 : -1;                       // серая кнопка не ловит Tab и Enter
@@ -13303,6 +13382,7 @@ function рисоватьСправку(к, нх, с){
   const кбк = с ? ВЕТКИ[с.ветка].кбк : "";
   const назн = назначение();
   const ph = (v, текст) => v ? экр(v) : `<span class="ph">${текст}</span>`;
+  const естьQR = !ноль && !нетСуммы && готов && ст !== "юр";
   let html = `<div class="h"><h3>Справка по оплате госпошлины</h3><span class="dt">${датаСловами(S.датаРасчёта || сегодняISO())}</span></div>`;
   if(ноль){
     let основание = к.основание ? к.основание[1] : (к.льгота.id !== "нет" ? к.льгота.назв : "");
@@ -13310,27 +13390,37 @@ function рисоватьСправку(к, нх, с){
     html += `<div class="free"><b>Государственная пошлина не уплачивается</b>${экр(основание)}${к.объяснение && к.объяснение !== "Государственная пошлина не уплачивается." ? "<br>" + экр(к.объяснение) : ""}</div>
       <table><tr><td class="k">Плательщик</td><td class="v">${ph(S.плательщик, "не указан")}</td></tr><tr><td class="k">Обращение</td><td class="v">${ph(назн, "по суду и требованию")}</td></tr></table>`;
   } else {
-    const row = (k, v, cls) => `<tr><td class="k">${k}</td><td class="v ${cls || ""}">${v}</td></tr>`;
+    // Таблица реквизитов — четыре колонки: короткие реквизиты идут парами,
+    // длинные занимают всю ширину (colspan=3).
+    const row = (k, v, cls) => `<tr><td class="k">${k}</td><td class="v ${cls || ""}" colspan="3">${v}</td></tr>`;
+    // Короткие реквизиты — по два в строке: справка на экране должна умещаться
+    // целиком без прокрутки (замечание Ивана 4 от 07.09.2026). В картинке и PDF
+    // порядок прежний — они рисуются на canvas и этой вёрстки не видят.
+    const пара = (k1, v1, k2, v2) => `<tr class="duo"><td class="k">${k1}</td><td class="v num">${v1}</td><td class="k">${k2}</td><td class="v num">${v2}</td></tr>`;
     // «Тихий» (Иван 06.09.2026): на экране сначала сумма — за ней приходят, —
     // потом реквизиты под подзаголовком. В картинке и PDF порядок прежний:
     // там это документ, он начинается с заголовка и реквизитов.
-    html += `<div class="pay"><div class="s${нетСуммы ? " ph" : ""}">${нетСуммы ? "Сумма появится, когда указаны: " + нх.filter(n => n !== "плательщик" && n !== "назначение").map(n => ИМЕНА_НЕХВАТКИ[n]).join(", ") : рубТочно(к.итог) + `<small>к оплате</small>`}</div>
+    // Сумма и QR — одной строкой наверху (Иван 07.09.2026): «правое окошко должно
+    // начинаться сверху и умещаться без прокрутки». Ниже — только реквизиты.
+    html += `<div class="paywrap">
+      <div class="pay"><div class="s${нетСуммы ? " ph" : ""}">${нетСуммы ? "Сумма появится, когда указаны: " + нх.filter(n => n !== "плательщик" && n !== "назначение").map(n => ИМЕНА_НЕХВАТКИ[n]).join(", ") : рубТочно(к.итог) + `<small>к оплате</small>`}</div>
       ${нетСуммы ? "" : `<div class="due">до <b>${датаРус(S.датаРасчёта || сегодняISO())}</b> включительно${к.льгота.id !== "нет" && к.льгота.действие === "порог" ? " · с учётом льготы" : ""}</div>`}</div>
+      ${естьQR ? `<div class="qrblock" id="qrbox"><div class="cap">QR-код строится…</div></div>` : ""}</div>
     <div class="reqs">Реквизиты для оплаты</div>
     <table>
-      ${row("Получатель", экр(ФНС.получатель))}${row("ИНН", ФНС.инн, "num")}${row("КПП", ФНС.кпп, "num")}
-      ${row("Счёт получателя", ФНС.счёт, "num")}${row("Банк получателя", экр(ФНС.банк))}${row("БИК", ФНС.бик, "num")}
-      ${row("Счёт банка получателя (ЕКС)", ФНС.корсчёт, "num")}
-      ${row("КБК", ph(кбк, "по суду"), "num")}${row("ОКТМО", ph(с && с.октмо, "по суду"), "num")}
-      ${row("Плательщик", ph([S.плательщик, S.соистецВкл ? S.соистец : ""].filter(Boolean).join(", "), "не указан"))}
+      ${row("Получатель", экр(ФНС.получатель))}${пара("ИНН", ФНС.инн, "КПП", ФНС.кпп)}
+      ${row("Счёт получателя", ФНС.счёт, "num")}${row("Банк получателя", экр(ФНС.банк))}
+      ${row("Счёт банка получателя (ЕКС)", ФНС.корсчёт, "num")}${пара("БИК", ФНС.бик, "ОКТМО", ph(с && с.октмо, "по суду"))}
+      ${row("КБК", ph(кбк, "по суду"), "num")}
+      ${row("Плательщик", ph(S.плательщик, "не указан"))}
       ${row("Назначение платежа", ph(назн, "по суду и требованию"))}
     </table>`;
     if(готов && ст === "юр") html += `<div class="org">Платёж — платёжным поручением по реквизитам выше. Назначение платежа скопируйте дословно.</div>`;
   }
-  // QR и приписка идут рядом — «хвост» справки
-  const сQR = !ноль && !нетСуммы && готов && ст !== "юр";
-  html += `<div class="tail">${сQR ? `<div class="qrblock" id="qrbox"><div class="cap">QR-код строится…</div></div>` : ""}
-    <div class="notes">${сQR ? `<p>Оплата по QR-коду.</p>` : ""}${с && с.мировой ? `<p>${экр(пометкаМирового(с))}${с.сайт ? ` Сайт участка: ${экр(с.сайт)}` : ""}</p>` : ""}<p>После оплаты, пожалуйста, пришлите платёжный документ — он нужен для обращения в суд.</p>${S.контакты ? `<p>${экр(S.контакты)}</p>` : ""}</div></div>`;
+  // «Хвост» — только приписки: подпись «Оплата по QR-коду» стоит под самим кодом
+  const сQR = естьQR;
+  html += `<div class="tail">
+    <div class="notes">${с && с.мировой ? `<p>${экр(пометкаМирового(с))}${с.сайт ? ` Сайт участка: ${экр(с.сайт)}` : ""}</p>` : ""}<p>После оплаты, пожалуйста, пришлите платёжный документ — он нужен для обращения в суд.</p>${S.контакты ? `<p>${экр(S.контакты)}</p>` : ""}</div></div>`;
   $("#sheet").innerHTML = html;
 
   clearTimeout(S.таймерQR);
@@ -13395,7 +13485,7 @@ function привязать(){
   // выдача
   // кнопки серые (без disabled — иначе не показывается подсказка на обёртке), поэтому готовность проверяем и здесь
   $("#btn-pdf").addEventListener("click", () => { if(!готово(неХватает())) return; if(typeof сохранитьPDF === "function") сохранитьPDF(); else { сохранитьВИсторию(); window.print(); } });
-  $("#btn-image").addEventListener("click", () => { if(!готово(неХватает())) return; if(typeof сохранитьКартинку === "function") сохранитьКартинку(); });
+  $("#recent-btn").addEventListener("click", () => переключитьНедавние());
   $("#sticky-go").addEventListener("click", () => $("#sheet").scrollIntoView({behavior:"smooth", block:"start"}));
   $("#sticky-sum").addEventListener("click", () => $("#sheet").scrollIntoView({behavior:"smooth", block:"start"}));
 }
