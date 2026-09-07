@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.92 2026-09-07 cddd75e c9cdc6f612">
+<meta name="build" content="2.0.94 2026-09-07 b7a7c96 872cbdc45f">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
@@ -103,7 +103,19 @@ a{color:var(--accent)}
 textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:vertical;line-height:22px;font-size:15px}
 
 /* значок «?» и всплывающее окно */
-.q-icon{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--ink-3);background:var(--card);color:var(--ink-2);font-size:13px;line-height:1;font-weight:600;padding:0;vertical-align:middle;flex:none}
+/* Плавные переходы при наведении (Иван 07.09.2026). Ниже — блок
+   prefers-reduced-motion: у кого в системе выключена анимация, всё мгновенно. */
+.inp{transition:border-color .16s ease,box-shadow .16s ease}
+.btn{transition:background-color .16s ease,border-color .16s ease,color .16s ease,opacity .16s ease}
+.card{transition:color .16s ease,border-color .16s ease}
+.card:hover{color:var(--ink-2)}
+.claim-add{transition:border-color .16s ease,background-color .16s ease}
+.claim-row .x{transition:color .16s ease,border-color .16s ease}
+.lnk,a{transition:color .16s ease}
+.recent-pop .rc>button{transition:background-color .16s ease}
+.money .cur-box .opt{transition:background-color .16s ease}
+.pop{transition:opacity .16s ease}
+.q-icon{transition:border-color .16s ease,color .16s ease,background-color .16s ease;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--ink-3);background:var(--card);color:var(--ink-2);font-size:13px;line-height:1;font-weight:600;padding:0;vertical-align:middle;flex:none}
 .q-icon:hover,.q-icon.on,.claim-add.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 /* маленький «?» — когда он стоит при счётчике знаков, а не при подписи поля */
 .q-icon.tiny{width:18px;height:18px;font-size:11px;font-weight:500;border-color:var(--line);color:var(--ink-3)}
@@ -174,14 +186,20 @@ textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:vertical;line-h
   box-shadow:0 12px 32px rgba(17,20,24,.16);max-height:min(360px,55vh);overflow:auto;display:none;padding:6px}
 .cb .box.open{display:block}
 .cb .box.up{top:auto;bottom:calc(100% + 4px)}
-.cb .opt{min-height:44px;padding:10px 12px;border-radius:8px;display:flex;gap:10px;align-items:center;cursor:pointer;font-size:16px;line-height:22px}
+.cb .opt{min-height:44px;padding:10px 12px 10px 14px;border-radius:0;display:flex;gap:10px;align-items:center;cursor:pointer;font-size:16px;line-height:22px;
+  position:relative;transition:color .16s ease,background-color .16s ease}
+/* выделение строки — тонкая полоса слева: под курсором светлая, у выбранной чернильная */
+.cb .opt:not(.grp)::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:transparent;transition:background-color .16s ease}
+.cb .opt:not(.grp):hover::before{background:var(--line)}
+.cb .opt:not(.grp):hover{background:var(--accent-soft)}
 .cb .opt .t{flex:1;min-width:0}
 .cb .opt .t small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:13px;line-height:18px;color:var(--ink-3);overflow:hidden}
 .cb .opt .tag{flex:none;font-size:12px;line-height:20px;padding:0 7px;border-radius:6px;background:var(--field);color:var(--ink-2);font-weight:500}
 .cb .opt .tag.arb{background:#ede9fe;color:#5b21b6}
 .cb .opt .tag.vs{background:#fef3c7;color:#92400e}
 .cb .opt .amt{flex:none;font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums}
-.cb .opt.act{background:var(--accent-soft)}
+.cb .opt.act{background:transparent;font-weight:600}
+.cb .opt.act::before{background:var(--ink)}
 .cb .opt.grp{min-height:28px;padding:8px 12px 2px;font-size:12px;line-height:16px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;cursor:default}
 .cb .opt.none{color:var(--ink-2);cursor:default;flex-wrap:wrap}
 .cb .opt.none .lnk{margin-left:auto;font-weight:600}
@@ -354,6 +372,11 @@ details.more>div{padding-top:var(--s3)}
   .sheet .pay,.sheet .qrblock,.sheet table,.sheet .free,.sheet .notes{break-inside:avoid}
 }
 
+/* Кому анимация мешает — выключаем (системная настройка) */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+
 </style>
 </head>
 <body>
@@ -515,7 +538,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.92", дата:"2026-09-07", коммит:"cddd75e", сумма:"c9cdc6f612"};
+const СБОРКА = {версия:"2.0.94", дата:"2026-09-07", коммит:"b7a7c96", сумма:"872cbdc45f"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -13183,8 +13206,11 @@ function ставкаТекст(т){
 /** строка под требованием: название (когда список), норма со ссылкой, ставка и значок «?».
     нормаПолная — когда ссылаться надо не на НК: у мер предварительной защиты по КАС
     пошлины нет не по тексту подп. 15 п. 1 ст. 333.19, а по его толкованию в Пленуме. */
-function нормаТребования(т, выбор){
-  return `<span>${выбор ? экр(т.назв) + " — " : ""}${т.нормаПолная ? неразрывно(экр(т.нормаПолная)) : ссылкаНаНорму(т.норма + " НК РФ")} · ${экр(ставкаТекст(т))}`
+function нормаТребования(т){
+  // Полное название требования здесь больше не печатается (Иван 07.09.2026):
+  // оно уже стоит в самом поле, а при нескольких требованиях повторялось строкой
+  // под каждым. Остаётся норма со ссылкой и ставка.
+  return `<span>${т.нормаПолная ? неразрывно(экр(т.нормаПолная)) : ссылкаНаНорму(т.норма + " НК РФ")} · ${экр(ставкаТекст(т))}`
        + (т.помощь ? ` <button type="button" class="q-icon" data-help="${экр(т.помощь)}" aria-label="Пояснение">?</button>` : "")
        + `</span>`;
 }
@@ -13261,7 +13287,7 @@ function рисоватьТребования(){
   if(подпись === подписьСтрок && box.children.length){ // только обновить подписи и ставки (зависят от статуса плательщика)
     box.querySelectorAll(".claim-row").forEach((row, i) => { const в = S.требования[i]; const т = в && требованиеПоId(в.id); if(!т) return;
       const inp = row.querySelector("[data-claim]"); if(inp) inp.value = т.кратко;
-      const u = row.querySelector(".under.norm"); if(u) u.innerHTML = нормаТребования(т, выборТребований());
+      const u = row.querySelector(".under.norm"); if(u) u.innerHTML = нормаТребования(т);
       const sj = row.querySelector("[data-subj]"); if(sj && document.activeElement !== sj) sj.value = сутьСтроки(в); });
     return;
   }
@@ -13288,7 +13314,7 @@ function рисоватьТребования(){
       <div class="under norm"></div>
       ${выбор && i > 0 ? `<button type="button" class="x" data-del="${i}" title="Убрать требование" aria-label="Убрать требование">×</button>` : ""}`;
     box.appendChild(row);
-    row.querySelector(".under.norm").innerHTML = нормаТребования(т, выбор);
+    row.querySelector(".under.norm").innerHTML = нормаТребования(т);
     // выбор требования
     const inp = row.querySelector("[data-claim]");
     if(inp) combobox({input:inp, box:row.querySelector(".claim-two > .fld.cb > .box"),
