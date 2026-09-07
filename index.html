@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.118 2026-09-07 2968321 eca844bd6c">
+<meta name="build" content="2.0.122 2026-09-07 29dd95d 2e6d07afe6">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
@@ -245,7 +245,7 @@ details.more>div{padding-top:var(--s3)}
 /* сумма слева, QR справа — одной строкой наверху справки (Иван 07.09.2026) */
 .sheet .paywrap{display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:8px}
 .sheet .paywrap .pay{flex:1 1 auto;min-width:0;border:0;padding:0;margin:0}
-.sheet .paywrap .qrblock{flex:none;max-width:200px;text-align:center}   /* шире не растягиваться: иначе сумма уезжает под код */
+.sheet .paywrap .qrblock{flex:none;max-width:280px;text-align:center}   /* шире не растягиваться: иначе сумма уезжает под код */
 .sheet .pay{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:0 0 12px;border:0;border-bottom:1px solid #111418;border-radius:0;margin-bottom:16px}
 .sheet .pay .s{font-size:44px;line-height:48px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.025em;white-space:nowrap}
 .sheet .pay .s.ph{font-size:20px;line-height:26px;font-weight:500}
@@ -256,7 +256,9 @@ details.more>div{padding-top:var(--s3)}
 .sheet .pay .s small{display:block;font-size:14px;font-weight:400;color:#6b7280;margin:2px 0 0;white-space:nowrap}
 .sheet .pay .due{color:#8a9099;font-size:13px}
 .sheet .qrblock{border:0;border-radius:0;padding:0;text-align:left;margin:0;flex:none}
-.sheet .qrblock svg{display:block;margin:0;width:168px;height:168px;max-width:100%}
+/* 250 px ≈ 66 мм на обычном мониторе, клетка ≈ 0,71 мм: с запасом к рекомендации
+   ГОСТ Р 56042-2014 (модуль ≥ 0,4064 мм) и вдвое ниже её потолка в 80 мм */
+.sheet .qrblock svg{display:block;margin:0;width:250px;height:250px;max-width:100%}
 .sheet .qrblock .cap{font-size:12px;line-height:16px;color:#8a9099;margin-top:6px}
 .claim-row .under.norm{margin-top:6px}
 .claim-row .x{align-self:center}
@@ -312,7 +314,7 @@ details.more>div{padding-top:var(--s3)}
 /* ─── компьютер: две колонки, форма тянется, справка справа 480 px ─── */
 @media (min-width: 1024px){
   .app{padding:0 32px 48px}
-  .cols{grid-template-columns:minmax(0,1fr) 520px;gap:40px;align-items:start}
+  .cols{grid-template-columns:minmax(0,1fr) 560px;gap:40px;align-items:start}
   #form{max-width:600px}
   .result{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;padding-right:2px}
   .stickybar{display:none}
@@ -325,9 +327,10 @@ details.more>div{padding-top:var(--s3)}
    поэтому режем только форму: 1083 px в одну колонку → около 575 в две.
    Порог 1400 px: две колонки полей примерно по 390 px плюс справка 480 px и отступы. */
 @media (min-width: 1400px){
-  .cols{grid-template-columns:minmax(0,1fr) 520px}
-  #form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 40px;align-items:start;max-width:1000px}
-  .fcol{min-width:0;max-width:480px}
+  /* справка шире формы: рядом с суммой должен помещаться крупный QR (Иван 07.09.2026) */
+  .cols{grid-template-columns:minmax(0,1fr) 600px}
+  #form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 40px;align-items:start;max-width:940px}
+  .fcol{min-width:0;max-width:450px}
   .fcol .q:first-child{border-top:0;padding-top:var(--s2)}
   /* на очень широком мониторе содержимое не растягивается во всю ширину:
      иначе между средним столбцом и справкой зияет пустота (Иван 07.09.2026) */
@@ -341,9 +344,12 @@ details.more>div{padding-top:var(--s3)}
   .result .actions{margin-top:var(--s1)}
   /* Справка не тянет страницу ниже экрана. Когда окно низкое, внутри себя ездит
      только лист справки — кнопки выдачи остаются на месте. */
-  .result{max-height:calc(100vh - 32px);overflow:visible;display:flex;flex-direction:column}
+  /* Справка никогда не прокручивается внутри себя (требование Ивана): если она
+     выше окна, едет вся страница. Раньше лист сжимался и получал свою полосу
+     прокрутки — при QR в 250 px это вылезло на ноутбуке 1440×760. */
+  .result{max-height:none;overflow:visible;display:flex;flex-direction:column}
   .result .actions{flex:none}
-  .sheet{flex:0 1 auto;min-height:0;overflow:auto}
+  .sheet{flex:0 0 auto;min-height:0;overflow:visible}
 }
 
 /* ─── печать: только справка ─── */
@@ -558,7 +564,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.118", дата:"2026-09-07", коммит:"2968321", сумма:"eca844bd6c"};
+const СБОРКА = {версия:"2.0.122", дата:"2026-09-07", коммит:"29dd95d", сумма:"2e6d07afe6"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
