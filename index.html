@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.159 2026-09-08 ea7b496 e0edc0b2ac">
+<meta name="build" content="2.0.166 2026-09-08 fc4c194 b9edb81cc9">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
@@ -50,7 +50,7 @@
   --t3:17px;  --t3l:24px;   /* значения полей и ввод             */
   --t4:21px;  --t4l:28px;   /* заголовки                         */
   --t5:28px;  --t5l:32px;   /* цена иска                         */
-  --t6:40px;  --t6l:44px;   /* итоговая сумма справки            */
+  --t6:44px;  --t6l:48px;   /* итоговая сумма справки            */
 
   /* ── отступы (сетка 4 px) ── */
   --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:24px; --s8:32px; --s12:48px;
@@ -100,7 +100,7 @@ a{color:var(--accent)}
 .top h1{font-size:var(--t4);line-height:var(--t4l);font-weight:600;margin:0;letter-spacing:-.01em}
 /* Мера строки: у кириллицы знак шире латинского на 18-23 %, норма 50-60 знаков.
    34em при 15 px — это около 60 знаков (было 760 px = 92 знака). */
-.top .intro{margin:var(--s2) 0 0;color:var(--ink-3);font-size:var(--t2);line-height:var(--t2l);max-width:34em}
+.top .intro{margin:var(--s2) 0 0;color:var(--ink-2);font-size:var(--t2);line-height:var(--t2l);max-width:34em}
 .cols{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s8)}
 .form,.result{min-width:0}
 .foot{color:var(--ink-3);font-size:var(--t1);line-height:var(--t1l);padding:var(--s8) 0 0;
@@ -117,7 +117,9 @@ a{color:var(--accent)}
   font-size:var(--t1);line-height:var(--t1l);min-height:44px}
 /* Шаг — кнопка: по нему можно нажать и доехать до нужного блока. Зона нажатия
    выше самой надписи за счёт вертикального отступа, полоса от этого не растёт. */
-.steps button{font:inherit;font-weight:500;color:var(--ink-4);background:none;border:0;
+/* Будущие шаги — цвет 6:1, а не «еле видно»: полосу читают и на солнце.
+   Разница с пройденными держится весом и чертой у текущего, а не бледностью. */
+.steps button{font:inherit;font-weight:400;color:var(--ink-3);background:none;border:0;
   padding:13px 5px;min-width:24px;border-bottom:2px solid transparent;border-radius:0;
   transition:color var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease)}
 .steps button[disabled]{cursor:default}
@@ -125,6 +127,13 @@ a{color:var(--accent)}
 .steps button.done{color:var(--ink-2);font-weight:400}
 .steps button.now{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
 .steps i{display:none}
+.steps .short{display:none;color:var(--ink-3);padding:7px 0}
+.steps .short b{color:var(--ink);font-weight:600}
+@media (max-width:480px){
+  .steps{min-height:32px}
+  .steps button{display:none}
+  .steps .short{display:block}
+}
 
 /* недавние — кнопка справа от заголовка, список во всплывающей панели (Иван 07.09.2026).
    Кнопка стоит на месте с первого экрана (раньше появлялась и ломала заголовок
@@ -155,7 +164,7 @@ a{color:var(--accent)}
 .fld:last-child,.q > .fld:last-of-type{margin-bottom:0}
 /* Подпись поля: 13/18 весом 500 цветом 6:1. Было 12/16 цветом 3,8:1 — ниже нормы
    WCAG и неотличимо от служебного текста (замечание «всё мелковато»). */
-.lbl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:var(--t1);line-height:var(--t1l);
+.lbl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:var(--t2);line-height:var(--t2l);
   font-weight:500;color:var(--ink-3);margin-bottom:var(--s2)}
 .lbl .sub{color:var(--ink-3);font-weight:400}
 .lbl .cnt{margin-left:auto;color:var(--ink-3);font-variant-numeric:tabular-nums lining-nums;font-size:var(--t1);font-weight:400}
@@ -387,6 +396,9 @@ details.more>div{padding-top:var(--s3)}
 .sheet .pay .s small{order:-1;display:block;font-size:var(--t1);line-height:var(--t1l);font-weight:500;color:var(--ink-3);
   margin:0 0 2px;white-space:nowrap;letter-spacing:.02em}
 .sheet .pay .due{color:var(--ink-3);font-size:var(--t1);line-height:var(--t1l);margin-top:var(--s2)}
+/* Приписки стоят под суммой, в левом столбце блока «сумма + QR»: там раньше
+   зияла белая дыра высотой в полкода. */
+.sheet .pay .notes{margin-top:var(--s5);max-width:none}
 .sheet .pay .due b{color:var(--ink);font-weight:600}
 .sheet .qrblock{border:0;border-radius:0;padding:0;text-align:center;margin:0;flex:none}
 /* 250 px ≈ 66 мм на обычном мониторе, клетка ≈ 0,71 мм: с запасом к рекомендации
@@ -435,6 +447,8 @@ details.more>div{padding-top:var(--s3)}
    Появляется вместе со вторым шагом и дальше высоту не меняет — раньше она
    возникала внезапно вместе со справкой и наезжала на поля формы.
    Подпись под суммой в две строки: суд и суть требования не сокращаются. */
+.stickybar::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:24px;pointer-events:none;
+  background:linear-gradient(to top,var(--card),transparent)}
 .stickybar{position:sticky;bottom:0;z-index:40;margin:var(--s4) calc(var(--pad) * -1) 0;
   padding:var(--s3) var(--pad) calc(var(--s3) + env(safe-area-inset-bottom));background:var(--card);
   border-top:1px solid var(--line);box-shadow:0 -8px 16px rgba(20,24,29,.05);
@@ -596,8 +610,12 @@ details.more>div{padding-top:var(--s3)}
   min-height:300px;padding:var(--s6);text-align:center;color:var(--ink-3);font-size:var(--t2);line-height:var(--t2l)}
 .sheet-ghost .qr-ph{width:120px;height:120px;border-radius:var(--r);background:
   repeating-linear-gradient(45deg,var(--bg) 0 8px,var(--card) 8px 16px);border:1px solid var(--line)}
-/* На телефоне заготовку не показываем: там дорога каждая строка экрана. */
-@media (max-width: 599px){ .sheet-ghost{display:none} }
+/* На телефоне заготовка короткая и без квадрата под QR — там дорога каждая
+   строка экрана, но и пустая полоса без объяснения ни к чему. */
+@media (max-width: 599px){
+  .sheet-ghost{min-height:0;padding:var(--s5)}
+  .sheet-ghost .qr-ph{display:none}
+}
 @media (min-width: 600px) and (max-width: 1179px){ .sheet-ghost{min-height:280px} .sheet-ghost .qr-ph{width:140px;height:140px} }
 
 /* Пересчёт суммы: меняется только прозрачность числа, QR подменяется мгновенно
@@ -788,7 +806,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.159", дата:"2026-09-08", коммит:"ea7b496", сумма:"e0edc0b2ac"};
+const СБОРКА = {версия:"2.0.166", дата:"2026-09-08", коммит:"fc4c194", сумма:"b9edb81cc9"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -13793,7 +13811,10 @@ function рисоватьШаги(){
     const открыт = n <= S.шаг;
     const кл = n < тек ? "done" : (n === тек ? "now" : "");
     return `<button type="button" class="${кл}" data-к="${куда}"${открыт ? "" : " disabled"}${n === тек ? ' aria-current="step"' : ""}>${экр(назв)}</button>`;
-  }).join("");
+  }).join("")
+    // На узком экране полоса из шести слов переносится в две строки рваным
+    // краем — там показываем одну строку «Шаг N из 6 · Название» (см. CSS).
+    + `<span class="short">Шаг ${тек} из ${ШАГИ.length} · <b>${экр(ШАГИ[тек - 1][0])}</b></span>`;
   if(box.dataset.h !== html){
     box.innerHTML = html; box.dataset.h = html;
     for(const b of $$("#steps button")) b.addEventListener("click", () => {
@@ -13852,6 +13873,12 @@ function рисоватьСправку(к, нх, с){
   // код — это упакованные реквизиты, банк подставляет их в платёжное поручение.
   // Организации рядом даётся примечание: сканируют не все банки, реквизиты сверить.
   const естьQR = !ноль && !нетСуммы && готов;
+  // Приписки считаем заранее: они уходят в левый столбец блока «сумма + QR».
+  // Причина: QR высотой 250 px, а блок суммы — 90, и слева оставалась белая
+  // дыра в 150-180 px (замечание агентов 08.09.2026). Заодно лист короче на
+  // ~60 px, а «после оплаты пришлите документ» стоит рядом с суммой, к которой
+  // и относится.
+  const приписки = `${естьQR && ст === "юр" ? `<p>Оплата по QR-коду доступна не во всех банках для бизнеса — после сканирования сверьте реквизиты.</p>` : ""}${с && с.мировой ? `<p>${экр(пометкаМирового(с))}${с.сайт ? ` Сайт участка: ${экр(с.сайт)}` : ""}</p>` : ""}<p>После оплаты, пожалуйста, пришлите платёжный документ — он нужен для обращения в суд.</p>${S.контакты ? `<p>${экр(S.контакты)}</p>` : ""}`;
   let html = `<div class="h"><h3>Справка по оплате госпошлины</h3><span class="dt">${датаСловами(S.датаРасчёта || сегодняISO())}</span></div>`;
   if(ноль){
     let основание = к.основание ? к.основание[1] : (к.льгота.id !== "нет" ? к.льгота.назв : "");
@@ -13869,7 +13896,8 @@ function рисоватьСправку(к, нх, с){
     // начинаться сверху и умещаться без прокрутки». Ниже — только реквизиты.
     html += `<div class="paywrap">
       <div class="pay"><div class="s${нетСуммы ? " ph" : ""}">${нетСуммы ? "Сумма появится, когда указаны: " + нх.filter(n => n !== "плательщик" && n !== "назначение").map(n => ИМЕНА_НЕХВАТКИ[n]).join(", ") : рубТочно(к.итог) + `<small>к оплате</small>`}</div>
-      ${нетСуммы ? "" : `<div class="due">до <b>${датаРус(S.датаРасчёта || сегодняISO())}</b> включительно${к.льгота.id !== "нет" && к.льгота.действие === "порог" ? " · с учётом льготы" : ""}</div>`}</div>
+      ${нетСуммы ? "" : `<div class="due">до <b>${датаРус(S.датаРасчёта || сегодняISO())}</b> включительно${к.льгота.id !== "нет" && к.льгота.действие === "порог" ? " · с учётом льготы" : ""}</div>`}
+      ${нетСуммы ? "" : `<div class="notes">${приписки}</div>`}</div>
       ${естьQR ? `<div class="qrblock" id="qrbox"><div class="cap">QR-код строится…</div></div>` : ""}</div>
     <div class="reqs">Реквизиты для оплаты</div>
     <table>
@@ -13887,10 +13915,9 @@ function рисоватьСправку(к, нх, с){
       ${row("Назначение платежа", ph(назн, "по суду и требованию"))}
     </table>`;
   }
-  // «Хвост» — только приписки: подпись «Оплата по QR-коду» стоит под самим кодом
-  const сQR = естьQR;
-  html += `<div class="tail">
-    <div class="notes">${сQR && ст === "юр" ? `<p>Оплата по QR-коду доступна не во всех банках для бизнеса — после сканирования сверьте реквизиты.</p>` : ""}${с && с.мировой ? `<p>${экр(пометкаМирового(с))}${с.сайт ? ` Сайт участка: ${экр(с.сайт)}` : ""}</p>` : ""}<p>После оплаты, пожалуйста, пришлите платёжный документ — он нужен для обращения в суд.</p>${S.контакты ? `<p>${экр(S.контакты)}</p>` : ""}</div></div>`;
+  // Приписки: при нулевой пошлине идут «хвостом» внизу листа, а при обычной —
+  // уже вставлены в левый столбец блока «сумма + QR» (см. выше).
+  if(ноль || нетСуммы) html += `<div class="tail"><div class="notes">${приписки}</div></div>`;
   $("#sheet").innerHTML = html;
   // Пересчёт суммы заметен: число проявляется за 180 мс. QR подменяется мгновенно,
   // иначе при каждой правке цены иска он мельтешит (замечание агентов 08.09.2026).
