@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.99 2026-09-07 6e3e483 a620955004">
+<meta name="build" content="2.0.101 2026-09-07 2785ada 938e1f6a8e">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
@@ -264,14 +264,20 @@ details.more>div{padding-top:var(--s3)}
 .sheet h4{font-size:16px;line-height:24px;font-weight:600;margin:0 0 6px}
 /* реквизиты на экране плотнее основного текста — иначе справка не умещается
    в окно ноутбука. В картинке и PDF свои размеры: они рисуются на canvas. */
-.sheet table{width:100%;border-collapse:collapse;margin-bottom:6px;font-size:14px;line-height:19px}
+/* Ширины колонок заданы жёстко: при автоматической раскладке длинные значения
+   (банк, назначение) перетягивали колонки на себя, и КПП с ОКТМО переносились
+   на вторую строку — замечание Ивана 07.09.2026, второй раз. */
+.sheet table{width:100%;border-collapse:collapse;margin-bottom:6px;font-size:14px;line-height:19px;table-layout:fixed}
+.sheet col.c-k{width:38%}
+.sheet col.c-v{width:20%}
+.sheet col.c-k2{width:22%}
+.sheet col.c-v2{width:20%}
 .sheet td{padding:3px 0;border-bottom:0;vertical-align:top}
-.sheet td.k{color:#8a9099;width:40%;padding-right:12px}
+.sheet td.k{color:#8a9099;padding-right:12px}
 /* пара коротких реквизитов в одной строке: ИНН/КПП, БИК/ОКТМО */
-.sheet tr.duo td.k{width:24%;white-space:nowrap}
-.sheet tr.duo td.v{width:26%}
-.sheet tr.duo td.k:nth-child(3){padding-left:14px;width:22%}
-.sheet tr.duo td.v:nth-child(4){width:28%}
+.sheet tr.duo td.k{white-space:nowrap}
+.sheet tr.duo td.v{white-space:nowrap;overflow-wrap:normal}
+.sheet tr.duo td.k:nth-child(3){padding-left:10px}
 .sheet td.v{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .sheet td.v.num{font-variant-numeric:tabular-nums}
 .sheet tr:last-child td{border-bottom:0}
@@ -541,7 +547,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.99", дата:"2026-09-07", коммит:"6e3e483", сумма:"a620955004"};
+const СБОРКА = {версия:"2.0.101", дата:"2026-09-07", коммит:"2785ada", сумма:"938e1f6a8e"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -13510,6 +13516,7 @@ function рисоватьСправку(к, нх, с){
       ${естьQR ? `<div class="qrblock" id="qrbox"><div class="cap">QR-код строится…</div></div>` : ""}</div>
     <div class="reqs">Реквизиты для оплаты</div>
     <table>
+      <colgroup><col class="c-k"><col class="c-v"><col class="c-k2"><col class="c-v2"></colgroup>
       ${row("Получатель", экр(ФНС.получатель))}${пара("ИНН", ФНС.инн, "КПП", ФНС.кпп)}
       ${row("Счёт получателя", ФНС.счёт, "num")}${row("Банк получателя", экр(ФНС.банк))}
       ${row("Счёт банка получателя (ЕКС)", ФНС.корсчёт, "num")}${пара("БИК", ФНС.бик, "ОКТМО", ph(с && с.октмо, "по суду"))}
