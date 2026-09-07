@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.143 2026-09-08 e202fd8 f2836091ab">
+<meta name="build" content="2.0.159 2026-09-08 ea7b496 e0edc0b2ac">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
@@ -62,7 +62,7 @@
   --sheet-w:560px;     /* справка: QR 250 + сумма 240 + поля           */
   --gap:48px;          /* между формой и справкой                     */
   --pad:16px;          /* поля страницы по бокам                      */
-  --bar-h:76px;        /* липкая панель телефона                      */
+  --bar-h:112px;       /* липкая панель телефона: подпись, сумма и две строки под ней */
 
   /* ── движение (токены Material 3) ── */
   --dur-fast:150ms; --dur:200ms; --dur-slow:300ms;
@@ -113,12 +113,18 @@ a{color:var(--accent)}
    WCAG 3.2.2 (уровень A) требует, чтобы ввод не менял контекст без
    предупреждения. Полоса и есть предупреждение: сколько шагов и какой сейчас.
    Высота у неё постоянная, поэтому при переходе ничего не прыгает. */
-.steps{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--s2);margin:var(--s4) 0 0;
-  font-size:var(--t1);line-height:var(--t1l);min-height:28px}
-.steps b{font-weight:500;color:var(--ink-4);padding:4px 0;border-bottom:2px solid transparent;transition:color var(--dur-fast) var(--ease)}
-.steps b.done{color:var(--ink-3);font-weight:400}
-.steps b.now{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
-.steps i{color:var(--line-2);font-style:normal}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--s4);margin:var(--s3) 0 var(--s5);
+  font-size:var(--t1);line-height:var(--t1l);min-height:44px}
+/* Шаг — кнопка: по нему можно нажать и доехать до нужного блока. Зона нажатия
+   выше самой надписи за счёт вертикального отступа, полоса от этого не растёт. */
+.steps button{font:inherit;font-weight:500;color:var(--ink-4);background:none;border:0;
+  padding:13px 5px;min-width:24px;border-bottom:2px solid transparent;border-radius:0;
+  transition:color var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease)}
+.steps button[disabled]{cursor:default}
+.steps button:not([disabled]):hover{color:var(--ink)}
+.steps button.done{color:var(--ink-2);font-weight:400}
+.steps button.now{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.steps i{display:none}
 
 /* недавние — кнопка справа от заголовка, список во всплывающей панели (Иван 07.09.2026).
    Кнопка стоит на месте с первого экрана (раньше появлялась и ломала заголовок
@@ -146,7 +152,7 @@ a{color:var(--accent)}
 .row{display:flex;gap:var(--s4);flex-wrap:wrap}
 .row>*{flex:1 1 220px;min-width:0}
 .fld{margin-bottom:var(--s5);position:relative;min-width:0}
-.fld:last-child{margin-bottom:0}
+.fld:last-child,.q > .fld:last-of-type{margin-bottom:0}
 /* Подпись поля: 13/18 весом 500 цветом 6:1. Было 12/16 цветом 3,8:1 — ниже нормы
    WCAG и неотличимо от служебного текста (замечание «всё мелковато»). */
 .lbl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:var(--t1);line-height:var(--t1l);
@@ -163,7 +169,7 @@ a{color:var(--accent)}
 .inp:focus{border-bottom-color:var(--accent);box-shadow:0 1px 0 0 var(--accent)}
 .inp::placeholder{color:var(--ink-4)}
 .inp[readonly]{cursor:pointer}
-.fld.need > .inp,.fld.need > .money-in > .inp{border-bottom-color:var(--need)}
+.fld.need > .inp,.fld.need > .money-in > .inp{border-bottom-color:var(--ink-3)}
 /* Поле-список: шеврон справа — единственный знак «здесь можно выбрать»
    (замечание «непонятно, куда нажимать»). Заливку и рамку не добавляем: это
    сломало бы направление «Тихий». Значок нарисован прямо в CSS, файл остаётся
@@ -177,7 +183,9 @@ a{color:var(--accent)}
    закрывается многоточием: полное название всё равно видно в липкой панели и в
    назначении платежа. */
 @media (max-width:599px){
-  #court{font-size:16px;text-overflow:ellipsis}
+  .inp{font-size:16px}
+  textarea.inp{font-size:var(--t2)}
+  #court{text-overflow:ellipsis}
 }
 /* У плательщика и ответчика список — это подсказки из истории, а не готовый
    перечень: шеврон обещал бы выбор из списка, поэтому там его нет. */
@@ -185,6 +193,7 @@ a{color:var(--accent)}
 .under{font-size:var(--t1);line-height:var(--t1l);color:var(--ink-3);margin-top:var(--s2);display:flex;gap:var(--s2) var(--s3);flex-wrap:wrap;align-items:center;min-width:0}
 .under .v{color:var(--ink-2);overflow-wrap:anywhere}
 .under .warn{color:var(--need)}
+.under .lnk{font-size:var(--t1);line-height:var(--t1l)}
 .under a{display:inline-block;padding:3px 0;min-height:24px}
 textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:none;overflow:hidden;line-height:var(--t2l);font-size:var(--t2)}
 
@@ -255,7 +264,7 @@ textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:none;overflow:h
 
 /* сумма с кнопкой валюты: поле, кнопка и список валют — в своей обёртке .money-in,
    поле курса и подсказки идут ниже и на позицию списка не влияют */
-.money-in{position:relative}
+.money-in{position:relative;max-width:340px}
 /* Цена иска — вторая по важности цифра после итога: 28 px с табличными цифрами,
    чтобы при наборе разряды не «дышали». */
 .money-in > .inp{font-size:var(--t5);line-height:var(--t5l);height:calc(var(--field-h) + 4px);padding-right:56px;
@@ -362,9 +371,9 @@ details.more>div{padding-top:var(--s3)}
 .sheet .who b{color:var(--ink);font-weight:600}
 .sheet .ph{color:var(--ink-4)}
 /* сумма слева, QR справа — одной строкой наверху справки (Иван 07.09.2026) */
-.sheet .paywrap{display:flex;align-items:center;gap:var(--s6);border-bottom:1px solid var(--line);padding-bottom:var(--s5);margin-bottom:var(--s5)}
+.sheet .paywrap{display:flex;align-items:flex-start;gap:var(--s6);border-bottom:1px solid var(--line);padding-bottom:var(--s5);margin-bottom:var(--s5)}
 .sheet .paywrap .pay{flex:1 1 auto;min-width:0;border:0;padding:0;margin:0}
-.sheet .paywrap .qrblock{flex:none;max-width:282px;text-align:center}   /* шире не растягиваться: иначе сумма уезжает под код */
+.sheet .paywrap .qrblock{flex:none;max-width:250px;text-align:center}   /* шире не растягиваться: иначе сумма уезжает под код */
 .sheet .pay{display:flex;flex-direction:column;align-items:flex-start;gap:0;padding:0;border:0;border-radius:0;margin:0}
 /* Сумма — самое крупное на листе. По 762-П сумма единственный реквизит,
    который в платёжном поручении печатается дважды и стоит выше получателя. */
@@ -400,8 +409,8 @@ details.more>div{padding-top:var(--s3)}
    раскладке длинные значения перетягивали колонки на себя (замечание Ивана
    07.09.2026, второй раз). */
 .sheet table{width:100%;border-collapse:collapse;margin-bottom:var(--s3);font-size:var(--t2);line-height:21px;table-layout:fixed}
-.sheet col.c-k{width:34%}
-.sheet col.c-v{width:66%}
+.sheet col.c-k{width:40%}
+.sheet col.c-v{width:60%}
 .sheet td{padding:3px 0;border-bottom:0;vertical-align:top}
 .sheet td.k{color:var(--ink-3);padding-right:var(--s4);font-size:var(--t1);line-height:21px}
 .sheet td.v{overflow-wrap:anywhere;color:var(--ink)}
@@ -426,18 +435,27 @@ details.more>div{padding-top:var(--s3)}
    Появляется вместе со вторым шагом и дальше высоту не меняет — раньше она
    возникала внезапно вместе со справкой и наезжала на поля формы.
    Подпись под суммой в две строки: суд и суть требования не сокращаются. */
-.stickybar{position:sticky;bottom:0;z-index:40;margin:0 calc(var(--pad) * -1);
+.stickybar{position:sticky;bottom:0;z-index:40;margin:var(--s4) calc(var(--pad) * -1) 0;
   padding:var(--s3) var(--pad) calc(var(--s3) + env(safe-area-inset-bottom));background:var(--card);
   border-top:1px solid var(--line);box-shadow:0 -8px 16px rgba(20,24,29,.05);
   display:flex;align-items:center;gap:var(--s4);min-height:var(--bar-h)}
 .stickybar .sum{flex:1;min-width:0;background:none;border:0;text-align:left;padding:0}
+.stickybar .sum b:not(.dash)::before{content:"к оплате";display:block;font-size:var(--t1);line-height:var(--t1l);
+  font-weight:500;color:var(--ink-3);letter-spacing:.02em}
 .stickybar .sum b{display:block;font-size:var(--t5);line-height:var(--t5l);font-weight:600;
   font-variant-numeric:tabular-nums lining-nums;color:var(--ink);letter-spacing:-.02em}
-.stickybar .sum b.dash{color:var(--ink-4);font-size:var(--t3);line-height:var(--t3l);font-weight:500}
+.stickybar .sum b.dash{color:var(--ink-3);font-size:var(--t3);line-height:var(--t3l);font-weight:500}
 .stickybar .sum span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
   font-size:var(--t1);line-height:var(--t1l);color:var(--ink-3);margin-top:2px}
 .stickybar .sum span.need{color:var(--need)}
 .stickybar .btn{flex:none;min-height:48px;padding:0 var(--s5)}
+@media (max-width:400px){
+  .stickybar{gap:var(--s3)}
+  .stickybar .sum b{font-size:var(--t4);line-height:var(--t4l)}
+  .stickybar .sum b.dash{font-size:var(--t2);line-height:var(--t2l)}
+  .stickybar .sum span{-webkit-line-clamp:2}
+  .stickybar .btn{padding:0 var(--s4)}
+}
 
 .toast{position:fixed;left:50%;bottom:calc(var(--bar-h) + 24px);transform:translateX(-50%);background:var(--ink);color:#fff;
   padding:12px 18px;border-radius:10px;font-size:var(--t2);line-height:var(--t2l);z-index:70;opacity:0;
@@ -475,15 +493,22 @@ details.more>div{padding-top:var(--s3)}
    Справка липкая: даже когда форма длиннее экрана, лист виден целиком. */
 @media (min-width: 1180px){
   :root{--pad:32px; --field-h:44px}
-  .app{padding:0 var(--pad) var(--s12)}
-  /* Пара «форма | справка» стоит по центру страницы: если тянуть форму на всю
-     свободную ширину, между ней и справкой зияет пустота (это и есть
+  /* Вся страница — одна сетка из двух колонок: слева заголовок, форма и подвал,
+     справа справка от самого верха. Так лист начинается на уровне заголовка, а не
+     под ним, — это те самые 146 px, из-за которых кнопка «Сохранить PDF» уходила
+     за нижний край окна ноутбука. Пара колонок стоит по центру: если тянуть форму
+     на всю свободную ширину, между ней и справкой зияет пустота (это и есть
      «расползается» на 24-дюймовом мониторе). */
-  .cols{grid-template-columns:minmax(0,620px) var(--sheet-w);gap:var(--gap);align-items:start;max-width:none;justify-content:center}
-  #form{max-width:620px}
+  .app{display:grid;grid-template-columns:minmax(0,620px) var(--sheet-w);gap:0 var(--gap);
+    justify-content:center;padding:var(--s6) var(--pad) var(--s12)}
+  .cols{display:contents}
+  .top{grid-column:1;grid-row:1;padding-top:0}
+  #form{grid-column:1;grid-row:2;max-width:620px}
+  .foot{grid-column:1;grid-row:3}
   .top,.steps{max-width:none}
-  .foot{max-width:42em}   /* мера строки та же: на широком экране подвал был 180 знаков */
-  .result{position:sticky;top:var(--s6);display:flex;flex-direction:column;max-height:none;overflow:visible}
+  /* мера строки держится на абзацах (.foot p — 38em), а черта идёт по всей колонке */
+  .result{grid-column:2;grid-row:1 / span 3;align-self:start;
+    position:sticky;top:var(--s6);display:flex;flex-direction:column;max-height:none;overflow:visible}
   .result .actions{flex:none}
   .sheet{flex:0 0 auto;min-height:0;overflow:visible;padding:28px}
   .stickybar{display:none}
@@ -492,7 +517,7 @@ details.more>div{padding-top:var(--s3)}
 /* ─── низкое окно: справка уплотняется, чтобы влезть целиком ───
    Ноутбуки 1366×768 и 1440×760 — самые ходовые. Правило «справка целиком
    помещается на экран» держится за счёт уплотнения, а не за счёт прокрутки. */
-@media (min-width: 1180px) and (max-height: 940px){
+@media (min-width: 900px) and (max-height: 940px){
   .sheet{padding:20px 24px}
   .sheet .paywrap{padding-bottom:var(--s3);margin-bottom:var(--s3)}
   .sheet td{padding:2px 0}
@@ -506,7 +531,7 @@ details.more>div{padding-top:var(--s3)}
 }
 /* Совсем низкое окно (ноутбуки 1366×768 и 1440×760): реквизиты становятся
    на ступень мельче, QR держим 250 px — это правило проекта. */
-@media (min-width: 1180px) and (max-height: 850px){
+@media (min-width: 900px) and (max-height: 850px){
   .sheet{padding:14px 20px}
   .sheet table{font-size:14px;line-height:18px}
   .sheet td{padding:1px 0}
@@ -568,10 +593,12 @@ details.more>div{padding-top:var(--s3)}
    ровно тогда, когда человек смотрел в поле «Цена иска». */
 .sheet-ghost{border:1px dashed var(--line-2);border-radius:var(--r2);background:transparent;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s4);
-  min-height:420px;padding:var(--s6);text-align:center;color:var(--ink-3);font-size:var(--t2);line-height:var(--t2l)}
-.sheet-ghost .qr-ph{width:180px;height:180px;border-radius:var(--r);background:
+  min-height:300px;padding:var(--s6);text-align:center;color:var(--ink-3);font-size:var(--t2);line-height:var(--t2l)}
+.sheet-ghost .qr-ph{width:120px;height:120px;border-radius:var(--r);background:
   repeating-linear-gradient(45deg,var(--bg) 0 8px,var(--card) 8px 16px);border:1px solid var(--line)}
-@media (max-width: 1179px){ .sheet-ghost{display:none} }
+/* На телефоне заготовку не показываем: там дорога каждая строка экрана. */
+@media (max-width: 599px){ .sheet-ghost{display:none} }
+@media (min-width: 600px) and (max-width: 1179px){ .sheet-ghost{min-height:280px} .sheet-ghost .qr-ph{width:140px;height:140px} }
 
 /* Пересчёт суммы: меняется только прозрачность числа, QR подменяется мгновенно
    (иначе он мельтешит). 180 мс — «мгновенно» по порогу восприятия. */
@@ -715,6 +742,13 @@ details.more>div{padding-top:var(--s3)}
     </div>
 
     </div>
+
+    <!-- Липкая панель (телефон и планшет) стоит внутри формы: пока форма на
+         экране — она внизу, дошли до справки — она уезжает вместе с формой. -->
+    <div class="stickybar no-print" id="stickybar" hidden>
+      <button type="button" class="sum" id="sticky-sum"><b>—</b><span></span></button>
+      <button type="button" class="btn primary" id="sticky-go">К справке</button>
+    </div>
   </section>
 
   <!-- ═══ результат ═══ -->
@@ -733,12 +767,6 @@ details.more>div{padding-top:var(--s3)}
       <span class="btn-wrap" id="wrap-copy"><button type="button" class="btn" id="btn-copy">Скопировать реквизиты</button></span>
     </div>
   </aside>
-  </div>
-
-  <!-- липкая панель (телефон) -->
-  <div class="stickybar no-print" id="stickybar">
-    <button type="button" class="sum" id="sticky-sum"><b>—</b><span></span></button>
-    <button type="button" class="btn primary" id="sticky-go">К справке</button>
   </div>
 
   <div class="foot no-print" id="foot"></div>
@@ -760,7 +788,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.143", дата:"2026-09-08", коммит:"e202fd8", сумма:"f2836091ab"};
+const СБОРКА = {версия:"2.0.159", дата:"2026-09-08", коммит:"ea7b496", сумма:"e0edc0b2ac"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -13729,8 +13757,9 @@ function нужныйШаг(){
   if(!готово(нх)) return 5;                             // 5 — назначение
   return 6;                                             // 6 — справка и выдача
 }
-/** Названия шагов для полосы под заголовком. Их пять: шестой — уже результат. */
-const ШАГИ = ["Суд", "Обращение", "Требования", "Стороны", "Назначение"];
+/** Полоса шагов под заголовком: название шага и блок, к которому он ведёт. */
+const ШАГИ = [["Суд", "#q-court"], ["Обращение", "#q-appeal"], ["Требования", "#q-claims"],
+              ["Стороны", "#q-payer"], ["Назначение", "#q-more"], ["Справка", "#sheet"]];
 /** Показать блоки до достигнутого шага, остальные спрятать. */
 function применитьШаг(){
   S.шаг = Math.max(S.шаг || 1, нужныйШаг());
@@ -13752,16 +13781,26 @@ function применитьШаг(){
   $("#app").classList.toggle("начали", S.шаг >= 2);
   рисоватьШаги();
 }
-/** Полоса шагов: пройденные, текущий и будущие. Высота постоянная. */
+/** Полоса шагов: пройденные, текущий и будущие. Высота постоянная.
+ *  Текущий берём по данным (нужныйШаг), а не по достигнутому уровню: когда всё
+ *  заполнено, «сейчас» — это «Справка», а не последнее заполненное поле.
+ *  По шагу можно нажать — страница доедет до нужного блока. */
 function рисоватьШаги(){
   const box = $("#steps"); if(!box) return;
-  const тек = Math.min(S.шаг, ШАГИ.length);
-  const html = ШАГИ.map((назв, i) => {
+  const тек = нужныйШаг();
+  const html = ШАГИ.map(([назв, куда], i) => {
     const n = i + 1;
+    const открыт = n <= S.шаг;
     const кл = n < тек ? "done" : (n === тек ? "now" : "");
-    return `<b class="${кл}"${n === тек ? ' aria-current="step"' : ""}>${экр(назв)}</b>`;
-  }).join('<i aria-hidden="true">·</i>');
-  if(box.dataset.h !== html){ box.innerHTML = html; box.dataset.h = html; }
+    return `<button type="button" class="${кл}" data-к="${куда}"${открыт ? "" : " disabled"}${n === тек ? ' aria-current="step"' : ""}>${экр(назв)}</button>`;
+  }).join("");
+  if(box.dataset.h !== html){
+    box.innerHTML = html; box.dataset.h = html;
+    for(const b of $$("#steps button")) b.addEventListener("click", () => {
+      const el = $(b.dataset["к"]);
+      if(el && !el.hidden) el.scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  }
 }
 
 /** Поле назначения не тянется мышью — высота подгоняется под текст (Иван 07.09.2026) */
@@ -13794,6 +13833,7 @@ function рисоватьКнопки(к, нх, с){
   const ноль = !нетСуммы && к.итог === 0;
   const ss = $("#sticky-sum"); const b = ss.querySelector("b"), sp = ss.querySelector("span");
   b.textContent = нетСуммы ? "Сумма появится ниже" : ноль ? "0 ₽" : рубТочно(к.итог); b.classList.toggle("dash", нетСуммы);
+  $("#sticky-go").classList.toggle("primary", !нетСуммы);
   // Подпись под суммой идёт в две строки и не сокращается: суд и суть требования
   // резать нельзя (правило проекта), а на 320-375 px в одну строку они не влезают.
   sp.textContent = нх.length ? почему : описаниеКоротко(с); sp.classList.toggle("need", !!нх.length);
