@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.90 2026-09-07 0c3528b b8fbe28d42">
+<meta name="build" content="2.0.92 2026-09-07 cddd75e c9cdc6f612">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
@@ -127,6 +127,9 @@ textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:vertical;line-h
 .claim-row{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--s2);align-items:start;margin-bottom:var(--s3)}
 .claim-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s3);min-width:0}
 .claim-two > .fld{min-width:0}
+/* столбец узкий, а в списке требований длинные названия и ставка —
+   выпадающий список шире своего поля (иначе строки рвутся на три) */
+.claim-two > .fld.cb > .box{right:auto;min-width:min(440px,calc(100vw - 32px))}
 .claim-row .under.norm{grid-column:1/2}
 .claim-row .cb{min-width:0}
 .claim-row .x{flex:none;width:var(--field-h);height:var(--field-h);border-radius:var(--r);border:1px solid var(--line);background:var(--card);color:var(--ink-3);font-size:20px;line-height:1}
@@ -512,7 +515,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.90", дата:"2026-09-07", коммит:"0c3528b", сумма:"b8fbe28d42"};
+const СБОРКА = {версия:"2.0.92", дата:"2026-09-07", коммит:"cddd75e", сумма:"c9cdc6f612"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
