@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.85 2026-09-07 58d8458 734b77b98a">
+<meta name="build" content="2.0.90 2026-09-07 0c3528b b8fbe28d42">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
@@ -123,8 +123,12 @@ textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:vertical;line-h
 .card.auto{border-bottom-style:dashed}
 
 /* требования: строки с выпадающим списком, «+» и «×» */
-.claim-row{display:flex;gap:var(--s2);align-items:flex-start;margin-bottom:var(--s2)}
-.claim-row .cb{flex:1;min-width:0}
+/* строка требования: два столбца — вид иска и вид требования (Иван 07.09.2026) */
+.claim-row{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--s2);align-items:start;margin-bottom:var(--s3)}
+.claim-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s3);min-width:0}
+.claim-two > .fld{min-width:0}
+.claim-row .under.norm{grid-column:1/2}
+.claim-row .cb{min-width:0}
 .claim-row .x{flex:none;width:var(--field-h);height:var(--field-h);border-radius:var(--r);border:1px solid var(--line);background:var(--card);color:var(--ink-3);font-size:20px;line-height:1}
 .claim-row .x:hover{color:var(--bad);border-color:var(--bad)}
 .claim-add{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px 0 8px;border-radius:18px;border:1px dashed var(--line);background:transparent;color:var(--accent);font-size:14px}
@@ -205,9 +209,9 @@ details.more[open]>summary::before{transform:rotate(90deg)}
 details.more>div{padding-top:var(--s3)}
 
 /* ─── справка — документ для клиента (всегда светлая) ─── */
-.sheet{background:#fff;color:#111418;border:0;border-radius:0;padding:18px 20px;font-size:14px;line-height:20px}
-.sheet .reqs{font-size:12px;line-height:16px;color:#8a9099;letter-spacing:.06em;text-transform:uppercase;margin:0 0 6px}
-.sheet .tail{display:flex;gap:18px;align-items:center;margin-top:10px;padding-top:12px;border-top:1px solid #ececea}
+.sheet{background:#fff;color:#111418;border:0;border-radius:0;padding:14px 18px;font-size:14px;line-height:20px}
+.sheet .reqs{font-size:12px;line-height:16px;color:#8a9099;letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
+.sheet .tail{display:flex;gap:18px;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid #ececea}
 /* заголовок и дата нужны только на печати: на экране сумма говорит сама за себя */
 .sheet .h{display:none;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
 .sheet .h h3{font-size:22px;line-height:28px;font-weight:600;margin:0}
@@ -217,9 +221,9 @@ details.more>div{padding-top:var(--s3)}
 .sheet .who b{color:#111418;font-weight:600}
 .sheet .ph{color:#9ca3af}
 /* сумма слева, QR справа — одной строкой наверху справки (Иван 07.09.2026) */
-.sheet .paywrap{display:flex;align-items:flex-start;gap:16px;border-bottom:1px solid #111418;padding-bottom:12px;margin-bottom:14px}
+.sheet .paywrap{display:flex;align-items:flex-start;gap:16px;border-bottom:1px solid #111418;padding-bottom:10px;margin-bottom:10px}
 .sheet .paywrap .pay{flex:1 1 auto;min-width:0;border:0;padding:0;margin:0}
-.sheet .paywrap .qrblock{flex:none;max-width:140px;text-align:center}   /* шире не растягиваться: иначе сумма уезжает под код */
+.sheet .paywrap .qrblock{flex:none;max-width:170px;text-align:center}   /* шире не растягиваться: иначе сумма уезжает под код */
 .sheet .pay{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:0 0 12px;border:0;border-bottom:1px solid #111418;border-radius:0;margin-bottom:16px}
 .sheet .pay .s{font-size:40px;line-height:44px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .sheet .pay .s.ph{font-size:20px;line-height:26px;font-weight:500}
@@ -229,16 +233,17 @@ details.more>div{padding-top:var(--s3)}
 .sheet .pay .s small{display:inline;font-size:14px;font-weight:400;color:#6b7280;margin-left:8px}
 .sheet .pay .due{color:#8a9099;font-size:13px}
 .sheet .qrblock{border:0;border-radius:0;padding:0;text-align:left;margin:0;flex:none}
-.sheet .qrblock svg{display:block;margin:0;width:92px;height:92px;max-width:100%}
+.sheet .qrblock svg{display:block;margin:0;width:136px;height:136px;max-width:100%}
 .sheet .qrblock .cap{font-size:12px;line-height:16px;color:#8a9099;margin-top:6px}
-.claim-row .subj-wrap{margin-top:var(--s2)}
 .claim-row .under.norm{margin-top:6px}
+.claim-row .x{align-self:center}
+@media (max-width:700px){ .claim-two{grid-template-columns:minmax(0,1fr);gap:var(--s2)} }
 .sheet .org{padding:12px 14px;background:#f3f4f6;border-radius:var(--r);color:#4b5563;margin-bottom:16px}
 .sheet h4{font-size:16px;line-height:24px;font-weight:600;margin:0 0 6px}
 /* реквизиты на экране плотнее основного текста — иначе справка не умещается
    в окно ноутбука. В картинке и PDF свои размеры: они рисуются на canvas. */
-.sheet table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:13px;line-height:17px}
-.sheet td{padding:3px 0;border-bottom:0;vertical-align:top}
+.sheet table{width:100%;border-collapse:collapse;margin-bottom:6px;font-size:14px;line-height:19px}
+.sheet td{padding:4px 0;border-bottom:0;vertical-align:top}
 .sheet td.k{color:#8a9099;width:40%;padding-right:12px}
 /* пара коротких реквизитов в одной строке: ИНН/КПП, БИК/ОКТМО */
 .sheet tr.duo td.k{width:auto;white-space:nowrap}
@@ -247,7 +252,7 @@ details.more>div{padding-top:var(--s3)}
 .sheet td.v.num{font-variant-numeric:tabular-nums}
 .sheet tr:last-child td{border-bottom:0}
 .sheet .grp td{border-bottom:0;padding-top:10px;color:#111418;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.04em}
-.sheet .notes{color:#8a9099;font-size:12px;line-height:17px;flex:1 1 0;min-width:0}
+.sheet .notes{color:#8a9099;font-size:11px;line-height:16px;flex:1 1 0;min-width:0}
 .sheet .notes p{margin:0 0 6px}
 /* Узкий экран: сумма и QR в одну строку не помещаются — ставим друг под друга.
    Порог 700 px, а не 480: на 480-600 сумма 40 px + QR 92 px уже жмут друг друга. */
@@ -288,7 +293,8 @@ details.more>div{padding-top:var(--s3)}
 /* ─── компьютер: две колонки, форма тянется, справка справа 480 px ─── */
 @media (min-width: 1024px){
   .app{padding:0 32px 48px}
-  .cols{grid-template-columns:minmax(0,1fr) 480px;gap:40px;align-items:start}
+  .cols{grid-template-columns:minmax(0,1fr) 520px;gap:40px;align-items:start}
+  #form{max-width:600px}
   .result{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;padding-right:2px}
   .stickybar{display:none}
   :root{--field-h:40px}
@@ -300,16 +306,18 @@ details.more>div{padding-top:var(--s3)}
    поэтому режем только форму: 1083 px в одну колонку → около 575 в две.
    Порог 1400 px: две колонки полей примерно по 390 px плюс справка 480 px и отступы. */
 @media (min-width: 1400px){
-  #form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 32px;align-items:start}
-  .fcol{min-width:0}
+  .cols{grid-template-columns:minmax(0,1fr) 560px}
+  #form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 32px;align-items:start;max-width:920px}
+  .fcol{min-width:0;max-width:440px}
   .fcol .q:first-child{border-top:0;padding-top:var(--s2)}
-  .app{padding-bottom:8px}
-  .top{padding:8px 0 2px}
-  .top .intro{font-size:13px;line-height:18px;max-width:none}
+  .app{padding-bottom:4px}
+  .result .btn{min-height:40px}
+  .top{padding:6px 0 2px}
+  .top .intro{font-size:12px;line-height:17px;max-width:none}
   /* подвал — справочный текст: на широком экране он мельче, чтобы страница
      умещалась в окно ноутбука целиком (замечание Ивана 4 от 07.09.2026) */
-  .foot{padding-top:8px;max-width:none;font-size:11px;line-height:16px}
-  .result .actions{margin-top:var(--s2)}
+  .foot{padding-top:6px;max-width:none;font-size:11px;line-height:15px}
+  .result .actions{margin-top:var(--s1)}
   /* Справка не тянет страницу ниже экрана. Когда окно низкое, внутри себя ездит
      только лист справки — кнопки выдачи остаются на месте. */
   .result{max-height:calc(100vh - 32px);overflow:visible;display:flex;flex-direction:column}
@@ -474,6 +482,7 @@ details.more>div{padding-top:var(--s3)}
     <div class="sheet" id="sheet"></div>
     <div class="actions no-print" id="actions">
       <span class="btn-wrap" id="wrap-pdf"><button type="button" class="btn primary" id="btn-pdf">Сохранить PDF</button></span>
+      <span class="btn-wrap" id="wrap-copy"><button type="button" class="btn" id="btn-copy">Скопировать реквизиты</button></span>
     </div>
   </aside>
   </div>
@@ -503,7 +512,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.85", дата:"2026-09-07", коммит:"58d8458", сумма:"734b77b98a"};
+const СБОРКА = {версия:"2.0.90", дата:"2026-09-07", коммит:"0c3528b", сумма:"b8fbe28d42"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -547,6 +556,17 @@ const ВЕТКИ = {
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 function экр(s){ return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+/** Неразрывные пробелы в ссылках на нормы (Иван 07.09.2026): «п. 1», «ст. 333.19»,
+ *  «№ 39», «НК РФ» не должны разрываться переносом строки. Применяется только к
+ *  справочным текстам — в назначение платежа и в QR неразрывный пробел не попадает. */
+function неразрывно(s){
+  return String(s == null ? "" : s)
+    .replace(/(^|[\s(«„])(ст|стт|п|пп|подп|ч|абз|гл|разд|прил|ред|утв)\.\s+/gu, (m, до, сл) => до + сл + ". ")
+    .replace(/№\s+/g, "№ ")
+    .replace(/\s+(НК|ГК|ГПК|АПК|КАС|УК|УПК|ТК|СК|БК)\s+РФ/gu, " $1 РФ")
+    .replace(/(\d)\s*-\s*(ФЗ|П|н)(?=\W|$)/g, "$1-$2")
+    .replace(/(\d)\s+(ФЗ)(?=\W|$)/g, "$1 $2");
+}
 function норм(s){ return String(s || "").toLowerCase().replace(/ё/g,"е").replace(/[«»"'.,()№;:]/g," ").replace(/\s+/g," ").trim(); }
 function токены(s){ return норм(s).split(" ").filter(Boolean); }
 /** все токены запроса — начала каких-нибудь слов в полях */
@@ -1064,17 +1084,17 @@ const ССЫЛКИ = {
 };
 function ссылка(ключ, текст){
   const url = ССЫЛКИ[ключ] || ССЫЛКИ["нк"];
-  return `<a href="${экр(url)}" target="_blank" rel="noopener">${экр(текст || ключ)}</a>`;
+  return `<a href="${экр(url)}" target="_blank" rel="noopener">${неразрывно(экр(текст || ключ))}</a>`;
 }
 /** Из «подп. 2 п. 1 ст. 333.36 НК РФ» сделать текст со ссылкой на статью в КонсультантПлюс */
 function ссылкаНаНорму(норма){
   const t = String(норма || "");
   const m = t.match(/333\.(16|18|19|20|21|22|36|37)/);
-  return m ? ссылка("333." + m[1], t) : экр(t);
+  return m ? ссылка("333." + m[1], t) : неразрывно(экр(t));
 }
 /** В длинном тексте (основание льготы, подсказка) сделать ссылками все упоминания статей главы 25.3 */
 function соСсылками(текст){
-  return экр(текст).replace(/ст\.\s*333\.(16|18|19|20|21|22|36|37)(\s*НК\s*РФ)?/g, (m, n, hv) => `<a href="${экр(ССЫЛКИ["333." + n])}" target="_blank" rel="noopener">${m}</a>`);
+  return неразрывно(экр(текст)).replace(/ст\.\s*333\.(16|18|19|20|21|22|36|37)(\s*НК\s*РФ)?/gu, (m, n, hv) => `<a href="${экр(ССЫЛКИ["333." + n])}" target="_blank" rel="noopener">${m}</a>`);
 }
 
 /** Валюты ISO 4217: код, наименование, знак. Рубль первым, затем частые, дальше по алфавиту наименований. */
@@ -13016,6 +13036,10 @@ function показатьПодсказку(anchor, html){
   if(попАнкор === anchor && !pop.hidden){ скрытьПодсказку(); return; }
   скрытьПодсказку();
   pop.innerHTML = `<button type="button" class="pop-x" aria-label="Закрыть">×</button>` + html;
+  // Неразрывные пробелы в номерах статей и пунктов — по узлам текста, чтобы
+  // не тронуть адреса ссылок (Иван 07.09.2026).
+  const ход = document.createTreeWalker(pop, NodeFilter.SHOW_TEXT);
+  for(let n = ход.nextNode(); n; n = ход.nextNode()) n.nodeValue = неразрывно(n.nodeValue);
   pop.hidden = false; попАнкор = anchor; anchor.classList.add("on");
   pop.querySelector(".pop-x").addEventListener("click", скрытьПодсказку);
   const r = anchor.getBoundingClientRect(), w = Math.min(440, window.innerWidth - 24);
@@ -13157,7 +13181,7 @@ function ставкаТекст(т){
     нормаПолная — когда ссылаться надо не на НК: у мер предварительной защиты по КАС
     пошлины нет не по тексту подп. 15 п. 1 ст. 333.19, а по его толкованию в Пленуме. */
 function нормаТребования(т, выбор){
-  return `<span>${выбор ? экр(т.назв) + " — " : ""}${т.нормаПолная ? экр(т.нормаПолная) : ссылкаНаНорму(т.норма + " НК РФ")} · ${экр(ставкаТекст(т))}`
+  return `<span>${выбор ? экр(т.назв) + " — " : ""}${т.нормаПолная ? неразрывно(экр(т.нормаПолная)) : ссылкаНаНорму(т.норма + " НК РФ")} · ${экр(ставкаТекст(т))}`
        + (т.помощь ? ` <button type="button" class="q-icon" data-help="${экр(т.помощь)}" aria-label="Пояснение">?</button>` : "")
        + `</span>`;
 }
@@ -13243,21 +13267,30 @@ function рисоватьТребования(){
   S.требования.forEach((в, i) => {
     const т = требованиеПоId(в.id); if(!т) return;
     const row = document.createElement("div"); row.className = "claim-row";
-    row.innerHTML = `<div class="fld cb">
-        <label class="lbl">${выбор ? (i === 0 ? "Требование" : "Требование " + (i + 1)) : "Требование"}</label>
-        ${выбор ? `<input class="inp" data-claim="${i}" readonly value="${экр(т.кратко)}"><div class="box"></div>`
-                : `<div class="claim-fixed">${экр(т.назв)}</div>`}
-        <div class="under norm"></div>
-        <div class="cb subj-wrap"><input class="inp subj" data-subj="${i}" placeholder="Суть требования: ${экр((т.суть || [])[0] || "о чём просите суд")}" autocomplete="off"><div class="box"></div></div>
+    // Два столбца в одной форме (Иван 07.09.2026): слева вид иска, справа — само
+    // требование. Так добавление второго и третьего требования не растит экран.
+    // Подпись левого столбца зависит от обращения: «Вид иска» уместно только у иска.
+    const подписьВида = (обращение().id === "иск" ? "Вид иска" : "Требование") + (выбор && i > 0 ? " " + (i + 1) : "");
+    row.innerHTML = `<div class="claim-two">
+        <div class="fld cb">
+          <label class="lbl">${экр(подписьВида)}</label>
+          ${выбор ? `<input class="inp" data-claim="${i}" readonly value="${экр(т.кратко)}"><div class="box"></div>`
+                  : `<div class="claim-fixed">${экр(т.назв)}</div>`}
+        </div>
+        <div class="fld cb subj-wrap">
+          <label class="lbl">Вид требования</label>
+          <input class="inp subj" data-subj="${i}" placeholder="${экр((т.суть || [])[0] || "о чём просите суд")}" autocomplete="off"><div class="box"></div>
+        </div>
       </div>
-      ${выбор && i > 0 ? `<button type="button" class="x" data-del="${i}" title="Убрать требование" aria-label="Убрать требование" style="margin-top:28px">×</button>` : ""}`;
+      <div class="under norm"></div>
+      ${выбор && i > 0 ? `<button type="button" class="x" data-del="${i}" title="Убрать требование" aria-label="Убрать требование">×</button>` : ""}`;
     box.appendChild(row);
     row.querySelector(".under.norm").innerHTML = нормаТребования(т, выбор);
     // выбор требования
     const inp = row.querySelector("[data-claim]");
-    if(inp) combobox({input:inp, box:row.querySelector(".fld.cb > .box"),
+    if(inp) combobox({input:inp, box:row.querySelector(".claim-two > .fld.cb > .box"),
       items: () => { const out = []; let гр = null; for(const тр of каталогОбращения()){ if(тр.группа !== гр){ гр = тр.группа; out.push({вид:"grp", текст:гр}); } out.push({вид:"req", т:тр, выбран:тр.id === в.id}); } return out; },
-      render: it => `<span class="t">${экр(it.т.кратко)}<small>${экр(it.т.назв)} · ${экр(it.т.нормаПолная || it.т.норма)}</small></span><span class="amt">${экр(ставкаТекст(it.т))}</span>`,
+      render: it => `<span class="t">${экр(it.т.кратко)}<small>${экр(it.т.назв)} · ${неразрывно(экр(it.т.нормаПолная || it.т.норма))}</small></span><span class="amt">${экр(ставкаТекст(it.т))}</span>`,
       onPick: it => {
         if(it.т.id === в.id) return false;                                  // тот же пункт — ничего не сбрасываем
         if(S.требования.some((x, j) => j !== i && x.id === it.т.id)){ toast("Это требование уже добавлено"); return false; }
@@ -13370,7 +13403,7 @@ function готово(нх){ const с = суд(); return нх.length === 0 && с
 function рисоватьКнопки(к, нх, с){
   const ok = готово(нх);
   const почему = нх.length ? "Укажите: " + нх.map(n => ИМЕНА_НЕХВАТКИ[n]).join(", ") : (с && !с.сверено ? "Реквизиты этого суда не сверены — справка не выдаётся" : "");
-  for(const id of ["pdf"]){
+  for(const id of ["pdf", "copy"]){
     const w = $("#wrap-" + id), b = $("#btn-" + id);
     b.classList.toggle("off", !ok); w.classList.toggle("off", !ok); b.setAttribute("aria-disabled", String(!ok));
     b.tabIndex = ok ? 0 : -1;                       // серая кнопка не ловит Tab и Enter
@@ -13498,6 +13531,23 @@ function привязать(){
   // кнопки серые (без disabled — иначе не показывается подсказка на обёртке), поэтому готовность проверяем и здесь
   $("#btn-pdf").addEventListener("click", () => { if(!готово(неХватает())) return; if(typeof сохранитьPDF === "function") сохранитьPDF(); else { сохранитьВИсторию(); window.print(); } });
   $("#recent-btn").addEventListener("click", () => переключитьНедавние());
+  // Скопировать реквизиты (Иван 07.09.2026): текст для платёжного поручения.
+  // navigator.clipboard есть не везде (file:// и старые браузеры) — запасной путь через textarea.
+  $("#btn-copy").addEventListener("click", async () => {
+    const нх = неХватает(); if(!готово(нх)) return;
+    const с = суд(); if(!с) return;
+    const текст = реквизитыТекстом({суд:с, кбк:ВЕТКИ[с.ветка].кбк, сумма:расчёт().итог, назначение:назначение()});
+    let ок = false;
+    try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(текст); ок = true; } }catch(e){ ок = false; }
+    if(!ок){
+      const ta = document.createElement("textarea");
+      ta.value = текст; ta.style.cssText = "position:fixed;top:-1000px;left:0;opacity:0";
+      document.body.appendChild(ta); ta.select();
+      try{ ок = document.execCommand("copy"); }catch(e){ ок = false; }
+      ta.remove();
+    }
+    toast(ок ? "Реквизиты скопированы" : "Скопировать не удалось — выделите их в справке");
+  });
   $("#sticky-go").addEventListener("click", () => $("#sheet").scrollIntoView({behavior:"smooth", block:"start"}));
   $("#sticky-sum").addEventListener("click", () => $("#sheet").scrollIntoView({behavior:"smooth", block:"start"}));
 }
