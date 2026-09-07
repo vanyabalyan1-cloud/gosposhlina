@@ -4,42 +4,80 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.126 2026-09-07 44960cf 9325ba6484">
+<meta name="build" content="2.0.143 2026-09-08 e202fd8 f2836091ab">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
 
 <style>
 /* ─────────────────────────────────────────────────────────────
-   «Госпошлина» v2 — стили. Основа: макет «Карточка с шагами».
-   Один акцент (сумма и одна кнопка), рамки только у полей, кегли
-   12/14/16/18/22/32, веса 400/600, системный шрифт, сетка 4 px,
-   поля 44 px на телефоне. Тема одна — светлая (решение Ивана
-   06.09.2026): переключателя нет, тёмной нет, справка всегда белая.
-   Дизайн допиливается в конце (Иван, 05.09.2026) — здесь только структура.
+   «Госпошлина» v2 — стили. Направление «Тихий» (выбрал Иван 06.09.2026):
+   у полей нет заливок, только тонкая черта снизу; цвет один, чернильный;
+   тема одна, светлая — переключателя нет.
+
+   Девятый круг (08.09.2026), спецификация
+   docs/superpowers/specs/2026-09-08-vid-i-udobstvo-design.md. Кратко:
+   • шесть ступеней кегля вместо двадцати (--t1…--t6), межстрочные кратны 4 px;
+   • все серые цвета доведены до контраста WCAG (подписи 6:1 вместо 3,8:1);
+   • форма — ОДНА колонка (NN/g: 78 % против 42 % отправок с первой попытки),
+     справка — липкая карточка справа от 1180 px, ниже — под формой;
+   • раскладка не двигается между шагами: место справки занято с первого экрана;
+   • поля 48/44 px, цели нажатия не меньше 24 px (WCAG 2.5.8), кнопки 48 px.
+   Числа и источники — в спецификации, повторять их здесь не нужно.
    ───────────────────────────────────────────────────────────── */
 :root{
+  /* Шрифт системный на каждой ОС: SF Pro (Apple), Segoe UI (Windows), Roboto (Android).
+     Corbel и Constantia не берём: у них минускульные нетабличные цифры, а у
+     Constantia нет знака ₽ — проверено разбором файлов шрифтов 08.09.2026. */
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
-  --mono:ui-monospace,Consolas,Menlo,monospace;
-  /* Направление «Тихий» (выбрал Иван 06.09.2026): у полей нет заливок, только
-     тонкая черта снизу; цвет один — чернильный, синего нет; у справки нет рамки. */
-  --ink:#111418; --ink-2:#48505c; --ink-3:#7c848f;
-  --line:#dde1e8; --field:transparent; --bg:#ffffff; --bg-2:#ffffff; --card:#ffffff;
-  --accent:#1a4c8b; --accent-soft:#eef3fa; --accent-ink:#ffffff;
-  --ok:#15803d; --ok-soft:#e9f5ee; --bad:#b91c1c; --bad-soft:#fbeaea; --need:#b45309; --need-soft:#fff7e6;
-  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s6:24px; --s8:32px;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,Menlo,"DejaVu Sans Mono",monospace;
+
+  /* ── цвет: рядом с каждым — контраст к белому ── */
+  --ink:#14181d;      /* 15,9:1 — основной текст            */
+  --ink-2:#3f4753;    /*  9,4:1 — вторичный текст           */
+  --ink-3:#5b6472;    /*  6,0:1 — подписи полей, подвал     */
+  --ink-4:#8a919c;    /*  3,3:1 — ТОЛЬКО плейсхолдеры       */
+  --line:#dfe3e9;     /* декоративные линии и рамки карточек */
+  --line-2:#b9c0cb;   /*  3,0:1 — черта под полем (WCAG 1.4.11) */
+  --field:transparent; --bg:#f4f6f8; --bg-2:#f4f6f8; --card:#ffffff;
+  --accent:#1a4c8b;   /*  7,4:1 */
+  --accent-soft:#eaf0f8; --accent-ink:#ffffff;
+  --ok:#15803d; --ok-soft:#e9f5ee; --bad:#b3261e; --bad-soft:#fbeaea; --need:#8a4b06; --need-soft:#fff7e6;
+
+  /* ── шкала кегля: шесть ступеней, межстрочные кратны 4 px ── */
+  --t1:13px;  --t1l:18px;   /* подписи полей, подвал, приписки   */
+  --t2:15px;  --t2l:22px;   /* пояснения, реквизиты, льготы      */
+  --t3:17px;  --t3l:24px;   /* значения полей и ввод             */
+  --t4:21px;  --t4l:28px;   /* заголовки                         */
+  --t5:28px;  --t5l:32px;   /* цена иска                         */
+  --t6:40px;  --t6l:44px;   /* итоговая сумма справки            */
+
+  /* ── отступы (сетка 4 px) ── */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:24px; --s8:32px; --s12:48px;
   --r:8px; --r2:12px;
-  --field-h:44px;
+
+  /* ── размеры ── */
+  --field-h:48px;      /* высота поля: телефон 48, компьютер 44 (ниже) */
+  --maxw:1280px;       /* шире содержимое не растягивается             */
+  --sheet-w:560px;     /* справка: QR 250 + сумма 240 + поля           */
+  --gap:48px;          /* между формой и справкой                     */
+  --pad:16px;          /* поля страницы по бокам                      */
+  --bar-h:76px;        /* липкая панель телефона                      */
+
+  /* ── движение (токены Material 3) ── */
+  --dur-fast:150ms; --dur:200ms; --dur-slow:300ms;
+  --ease:cubic-bezier(.2,0,0,1);
+  --ease-out:cubic-bezier(.05,.7,.1,1);
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;padding:0}
-body{background:var(--bg-2);color:var(--ink);font:16px/24px var(--sans);-webkit-text-size-adjust:100%;overflow-x:hidden}
+body{background:var(--bg-2);color:var(--ink);font:var(--t3)/var(--t3l) var(--sans);-webkit-text-size-adjust:100%;overflow-x:hidden}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer}
 mark{background:none;color:var(--accent);font-weight:600}
 a{color:var(--accent)}
-.lnk{background:none;border:0;padding:0;color:var(--accent);font-size:14px;line-height:20px;cursor:pointer}
+.lnk{background:none;border:0;padding:3px 0;color:var(--accent);font-size:var(--t2);line-height:var(--t2l);cursor:pointer;min-height:28px}
 .lnk:hover{text-decoration:underline}
 
 /* ─── статичный баннер для предпросмотра без скриптов ─── */
@@ -53,154 +91,226 @@ a{color:var(--accent)}
 #errbar .err-v{display:block;font-size:12px;opacity:.75}
 #errbar .err-x{position:absolute;right:8px;top:6px;background:none;border:0;color:#fff;font-size:22px;line-height:28px;width:32px}
 
-/* ─── каркас: на всю ширину окна ─── */
-.app{padding:0 16px 96px;max-width:none;margin:0 auto}
-.top{padding:14px 0 6px}
-.top h1{font-size:22px;line-height:28px;font-weight:600;margin:0}
-.top .intro{margin:6px 0 0;color:var(--ink-2);font-size:14px;line-height:20px;max-width:760px}
-.cols{display:grid;grid-template-columns:1fr;gap:var(--s8)}
+/* ─── каркас ───────────────────────────────────────────────────
+   Контейнер не шире 1280 px и стоит по центру: на 24" мониторе форма и справка
+   не разъезжаются по краям (замечание Ивана «расползаются»). Раскладка одна и
+   та же во всех состояниях — левый край формы не двигается никогда. */
+.app{padding:0 var(--pad) calc(var(--bar-h) + var(--s6));max-width:var(--maxw);margin:0 auto}
+.top{padding:var(--s6) 0 var(--s2)}
+.top h1{font-size:var(--t4);line-height:var(--t4l);font-weight:600;margin:0;letter-spacing:-.01em}
+/* Мера строки: у кириллицы знак шире латинского на 18-23 %, норма 50-60 знаков.
+   34em при 15 px — это около 60 знаков (было 760 px = 92 знака). */
+.top .intro{margin:var(--s2) 0 0;color:var(--ink-3);font-size:var(--t2);line-height:var(--t2l);max-width:34em}
+.cols{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s8)}
 .form,.result{min-width:0}
-.foot{color:var(--ink-3);font-size:12px;line-height:18px;padding:24px 0 0;max-width:900px}
-.foot p{margin:0 0 4px}
-.foot a{color:var(--ink-2);text-decoration:underline}
+.foot{color:var(--ink-3);font-size:var(--t1);line-height:var(--t1l);padding:var(--s8) 0 0;
+  border-top:1px solid var(--line);margin-top:var(--s8)}
+.foot p{margin:0 0 var(--s1);max-width:38em}
+.foot a{color:var(--ink-3);text-decoration:underline}
+.foot a:hover{color:var(--ink)}
 
-/* недавние — кнопка справа от заголовка, список во всплывающей панели (Иван 07.09.2026) */
-.top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+/* ─── полоса шагов: где я и что дальше ───────────────────────────
+   WCAG 3.2.2 (уровень A) требует, чтобы ввод не менял контекст без
+   предупреждения. Полоса и есть предупреждение: сколько шагов и какой сейчас.
+   Высота у неё постоянная, поэтому при переходе ничего не прыгает. */
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--s2);margin:var(--s4) 0 0;
+  font-size:var(--t1);line-height:var(--t1l);min-height:28px}
+.steps b{font-weight:500;color:var(--ink-4);padding:4px 0;border-bottom:2px solid transparent;transition:color var(--dur-fast) var(--ease)}
+.steps b.done{color:var(--ink-3);font-weight:400}
+.steps b.now{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.steps i{color:var(--line-2);font-style:normal}
+
+/* недавние — кнопка справа от заголовка, список во всплывающей панели (Иван 07.09.2026).
+   Кнопка стоит на месте с первого экрана (раньше появлялась и ломала заголовок
+   на две строки на 320 px), поэтому у строки заголовка постоянная высота. */
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:var(--s4);min-height:44px}
+.top-row h1{flex:1 1 auto;min-width:0}
 .recent-wrap{position:relative;flex:none}
 .recent-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:60;width:min(380px,calc(100vw - 32px));
-  background:var(--card);border:1px solid var(--line);border-radius:var(--r2);box-shadow:0 10px 30px rgba(17,20,24,.14);
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r2);box-shadow:0 10px 30px rgba(20,24,29,.14);
   padding:4px;max-height:min(60vh,440px);overflow:auto}
 .recent-pop .rc{display:block;border-bottom:1px solid var(--line)}
 .recent-pop .rc:last-of-type{border-bottom:0}
-.recent-pop .rc>button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:9px 12px;font-size:14px;line-height:18px;min-width:0}
+.recent-pop .rc>button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:var(--s3);font-size:var(--t2);line-height:var(--t2l);min-width:0;min-height:44px}
 .recent-pop .rc>button b{display:block;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.recent-pop .rc>button span{color:var(--ink-3);font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.recent-pop .rc>button:hover{background:var(--field)}
+.recent-pop .rc>button span{color:var(--ink-3);font-size:var(--t1);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent-pop .rc>button:hover{background:var(--accent-soft)}
 .recent-pop .rp-foot{display:flex;justify-content:flex-end;border-top:1px solid var(--line);margin-top:4px;padding-top:4px}
-.recent-pop .rp-foot button{border:0;background:none;color:var(--ink-3);font-size:13px;padding:6px 12px;text-decoration:underline}
+.recent-pop .rp-foot button{border:0;background:none;color:var(--ink-3);font-size:var(--t1);padding:var(--s2) var(--s3);text-decoration:underline;min-height:44px}
 .recent-pop .rp-foot button:hover{color:var(--ink)}
 
-/* блоки */
-.q{padding:var(--s3) 0 var(--s4);border-top:0}
-.q:first-child{padding-top:var(--s2)}
-.row{display:flex;gap:var(--s3);flex-wrap:wrap}
+/* блоки: между шагами 32 px, между полями внутри шага 20 px.
+   Отношение внешнего отступа к внутреннему 1,6 — закон близости требует ≥1,5. */
+.q{padding:0 0 var(--s8);border-top:0}
+.q:last-child{padding-bottom:0}
+.row{display:flex;gap:var(--s4);flex-wrap:wrap}
 .row>*{flex:1 1 220px;min-width:0}
-.fld{margin-bottom:var(--s4);position:relative;min-width:0}
+.fld{margin-bottom:var(--s5);position:relative;min-width:0}
 .fld:last-child{margin-bottom:0}
-.lbl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;line-height:16px;color:var(--ink-3);margin-bottom:6px}
+/* Подпись поля: 13/18 весом 500 цветом 6:1. Было 12/16 цветом 3,8:1 — ниже нормы
+   WCAG и неотличимо от служебного текста (замечание «всё мелковато»). */
+.lbl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:var(--t1);line-height:var(--t1l);
+  font-weight:500;color:var(--ink-3);margin-bottom:var(--s2)}
 .lbl .sub{color:var(--ink-3);font-weight:400}
-.lbl .cnt{margin-left:auto;color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:13px}
+.lbl .cnt{margin-left:auto;color:var(--ink-3);font-variant-numeric:tabular-nums lining-nums;font-size:var(--t1);font-weight:400}
 .lbl .cnt + .q-icon{margin-left:2px}
 .lbl .cnt.over{color:var(--bad);font-weight:600}
-.inp{width:100%;height:var(--field-h);padding:0 0 6px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;outline:0;color:var(--ink);font-size:17px;line-height:24px}
-.inp:focus{border-bottom-color:var(--ink);box-shadow:0 1px 0 0 var(--ink)}
-.inp::placeholder{color:var(--ink-3)}
+.inp{width:100%;height:var(--field-h);padding:0 0 8px;border:0;border-bottom:1px solid var(--line-2);border-radius:0;
+  background:transparent;outline:0;color:var(--ink);font-size:var(--t3);line-height:var(--t3l)}
+.inp:hover{border-bottom-color:var(--ink-3)}
+/* Фокус — черта 2 px акцентного цвета: WCAG 2.4.13 требует периметр 2 px
+   и изменение контраста этих пикселей не меньше 3:1. */
+.inp:focus{border-bottom-color:var(--accent);box-shadow:0 1px 0 0 var(--accent)}
+.inp::placeholder{color:var(--ink-4)}
 .inp[readonly]{cursor:pointer}
 .fld.need > .inp,.fld.need > .money-in > .inp{border-bottom-color:var(--need)}
-.under{font-size:13px;line-height:18px;color:var(--ink-3);margin-top:7px;display:flex;gap:var(--s2) var(--s3);flex-wrap:wrap;align-items:center;min-width:0}
+/* Поле-список: шеврон справа — единственный знак «здесь можно выбрать»
+   (замечание «непонятно, куда нажимать»). Заливку и рамку не добавляем: это
+   сломало бы направление «Тихий». Значок нарисован прямо в CSS, файл остаётся
+   одним и без обращений в сеть. */
+.fld.cb > .inp{padding-right:20px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.5 7 9.5 11 5.5' fill='none' stroke='%235b6472' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 0 top calc(50% - 4px)}
+/* Названия судов длинные: «Щербинский районный суд города Москвы» — 342 px при
+   кегле 17. На телефоне поле уже, поэтому там кегль на ступень ниже (16 px —
+   меньше нельзя, iOS сам увеличит страницу), а на совсем узких экранах хвост
+   закрывается многоточием: полное название всё равно видно в липкой панели и в
+   назначении платежа. */
+@media (max-width:599px){
+  #court{font-size:16px;text-overflow:ellipsis}
+}
+/* У плательщика и ответчика список — это подсказки из истории, а не готовый
+   перечень: шеврон обещал бы выбор из списка, поэтому там его нет. */
+.fld.cb.no-chev > .inp,#f-payer > .inp,#f-def > .inp{background-image:none;padding-right:0}
+.under{font-size:var(--t1);line-height:var(--t1l);color:var(--ink-3);margin-top:var(--s2);display:flex;gap:var(--s2) var(--s3);flex-wrap:wrap;align-items:center;min-width:0}
 .under .v{color:var(--ink-2);overflow-wrap:anywhere}
 .under .warn{color:var(--need)}
-textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:none;overflow:hidden;line-height:22px;font-size:15px}
+.under a{display:inline-block;padding:3px 0;min-height:24px}
+textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:none;overflow:hidden;line-height:var(--t2l);font-size:var(--t2)}
 
 /* значок «?» и всплывающее окно */
-/* Плавные переходы при наведении (Иван 07.09.2026). Ниже — блок
-   prefers-reduced-motion: у кого в системе выключена анимация, всё мгновенно. */
-.inp{transition:border-color .16s ease,box-shadow .16s ease}
-.btn{transition:background-color .16s ease,border-color .16s ease,color .16s ease,opacity .16s ease}
-.card{transition:color .16s ease,border-color .16s ease}
-.card:hover{color:var(--ink-2)}
-.claim-add{transition:border-color .16s ease,background-color .16s ease}
-.claim-row .x{transition:color .16s ease,border-color .16s ease}
-.lnk,a{transition:color .16s ease}
-.recent-pop .rc>button{transition:background-color .16s ease}
-.money .cur-box .opt{transition:background-color .16s ease}
-.pop{transition:opacity .16s ease}
-.q-icon{transition:border-color .16s ease,color .16s ease,background-color .16s ease;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--ink-3);background:var(--card);color:var(--ink-2);font-size:13px;line-height:1;font-weight:600;padding:0;vertical-align:middle;flex:none}
+/* Плавные переходы: одна длительность на всё мелкое (150 мс) и одна кривая —
+   standard из Material 3. Ниже — блок prefers-reduced-motion: у кого в системе
+   выключена анимация, всё происходит мгновенно. */
+.inp{transition:border-color var(--dur-fast) var(--ease),box-shadow var(--dur-fast) var(--ease)}
+.btn{transition:background-color var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease),opacity var(--dur-fast) var(--ease)}
+.card{transition:color var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease)}
+.card:hover{color:var(--ink)}
+.claim-add{transition:border-color var(--dur-fast) var(--ease),background-color var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease)}
+.claim-row .x{transition:color var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease)}
+.lnk,a{transition:color var(--dur-fast) var(--ease)}
+.recent-pop .rc>button{transition:background-color var(--dur-fast) var(--ease)}
+.money .cur-box .opt{transition:background-color var(--dur-fast) var(--ease)}
+.pop{transition:opacity var(--dur-fast) var(--ease)}
+.q-icon{transition:border-color var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease),background-color var(--dur-fast) var(--ease);
+  display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--line-2);
+  background:var(--card);color:var(--ink-3);font-size:var(--t1);line-height:1;font-weight:600;padding:0;vertical-align:middle;flex:none}
 .q-icon:hover,.q-icon.on,.claim-add.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-/* маленький «?» — когда он стоит при счётчике знаков, а не при подписи поля */
-.q-icon.tiny{width:18px;height:18px;font-size:11px;font-weight:500;border-color:var(--line);color:var(--ink-3)}
+/* Маленький «?» стоит при счётчике знаков. Раньше он был 18×18 — ниже
+   нижней границы WCAG 2.5.8 (24 px). Теперь 24×24, а мельче выглядит за счёт
+   более тонкой рамки и меньшего знака внутри. */
+.q-icon.tiny{width:24px;height:24px;font-size:var(--t1);font-weight:500;border-color:var(--line);color:var(--ink-3)}
 .pop{position:fixed;z-index:80;max-width:min(440px,calc(100vw - 24px));max-height:calc(100vh - 16px);overflow:auto;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:var(--r2);
-  box-shadow:0 12px 32px rgba(17,20,24,.18);padding:12px 40px 12px 14px;font-size:14px;line-height:20px}
+  box-shadow:0 12px 32px rgba(20,24,29,.18);padding:16px 44px 16px 18px;font-size:var(--t2);line-height:var(--t2l)}
 .pop b{display:block;margin-bottom:4px;font-weight:600}
 .pop p{margin:0 0 8px}
 .pop p:last-child{margin-bottom:0}
 .pop a{color:var(--accent);text-decoration:underline;overflow-wrap:anywhere}
-.pop .pop-x{position:absolute;right:4px;top:4px;background:none;border:0;color:var(--ink-3);font-size:22px;line-height:36px;width:36px;height:36px;padding:0}
+.pop .pop-x{position:absolute;right:6px;top:6px;background:none;border:0;color:var(--ink-3);font-size:22px;line-height:36px;width:36px;height:36px;padding:0}
 
-/* карточки выбора (статус плательщика, вид суда) */
-.cards{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:var(--s3)}
-.card{flex:0 0 auto;min-height:auto;padding:0 0 4px;border:0;border-bottom:2px solid transparent;border-radius:0;background:none;font-size:14px;line-height:20px;color:var(--ink-3);text-align:left}
+/* карточки выбора (статус плательщика, вид суда) — вкладки с подчёркиванием */
+.cards{display:flex;gap:var(--s6);flex-wrap:wrap;margin-bottom:var(--s4)}
+.card{flex:0 0 auto;min-height:44px;padding:0 0 6px;border:0;border-bottom:2px solid transparent;border-radius:0;background:none;
+  font-size:var(--t2);line-height:var(--t2l);color:var(--ink-3);text-align:left;display:inline-flex;align-items:flex-end}
 .card:hover{color:var(--ink)}
 .card.on{border-bottom-color:var(--ink);color:var(--ink);font-weight:600}
 .card.auto{border-bottom-style:dashed}
 
 /* требования: строки с выпадающим списком, «+» и «×» */
-/* строка требования: два столбца — вид иска и вид требования (Иван 07.09.2026) */
-.claim-row{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--s2);align-items:start;margin-bottom:var(--s3)}
-.claim-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s3);min-width:0}
-.claim-two > .fld{min-width:0}
+/* Строка требования: вид иска и вид требования рядом — но только пока каждому
+   достаётся не меньше 260 px. На 1024 и 1440 колонка была 164-170 px, и текст
+   «о взыскании неустойки» резался (замер 08.09.2026): auto-fit сам ставит их
+   друг под друга, когда места мало, и правило «суть не сокращается» больше
+   не нарушается ни на одной ширине. */
+.claim-row{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--s2);align-items:start;margin-bottom:var(--s4)}
+.claim-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--s4);min-width:0}
+.claim-two > .fld{min-width:0;margin-bottom:0}
 /* столбец узкий, а в списке требований длинные названия и ставка —
    выпадающий список шире своего поля (иначе строки рвутся на три) */
 .claim-two > .fld.cb > .box{right:auto;min-width:min(440px,calc(100vw - 32px))}
 .claim-row .under.norm{grid-column:1/2}
 .claim-row .cb{min-width:0}
-.claim-row .x{flex:none;width:var(--field-h);height:var(--field-h);border-radius:var(--r);border:1px solid var(--line);background:var(--card);color:var(--ink-3);font-size:20px;line-height:1}
+.claim-row .x{flex:none;width:44px;height:44px;border-radius:var(--r);border:1px solid var(--line);background:var(--card);color:var(--ink-3);font-size:20px;line-height:1}
 .claim-row .x:hover{color:var(--bad);border-color:var(--bad)}
-.claim-add{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px 0 8px;border-radius:18px;border:1px dashed var(--line);background:transparent;color:var(--accent);font-size:14px}
-.claim-add b{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-weight:600;line-height:1}
-.claim-add:hover{border-color:var(--accent)}
-.claim-fixed{font-size:14px;line-height:20px;color:var(--ink-2);margin-bottom:var(--s3)}
-#claims{margin-bottom:var(--s4)}
+/* «Добавить требование» — необязательное действие, поэтому оно не должно быть
+   самым заметным на экране (взгляд уводило от «Цены иска»). Контурный знак «+»
+   вместо залитого кружка, высота 44 px ради пальца. */
+.claim-add{display:inline-flex;align-items:center;gap:var(--s2);min-height:44px;padding:0 var(--s3) 0 var(--s2);border-radius:var(--r);
+  border:1px solid transparent;background:transparent;color:var(--accent);font-size:var(--t2)}
+.claim-add b{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;
+  border:1.5px solid currentColor;background:transparent;color:inherit;font-weight:400;line-height:1;font-size:var(--t2)}
+.claim-add:hover{border-color:var(--line-2);background:var(--accent-soft)}
+.claim-fixed{font-size:var(--t3);line-height:var(--t3l);color:var(--ink);margin-bottom:var(--s3)}
+#claims{margin-bottom:var(--s5)}
 
 /* сумма с кнопкой валюты: поле, кнопка и список валют — в своей обёртке .money-in,
    поле курса и подсказки идут ниже и на позицию списка не влияют */
 .money-in{position:relative}
-.money-in > .inp{font-size:26px;line-height:32px;height:44px;padding-right:72px;font-variant-numeric:tabular-nums;font-weight:600;letter-spacing:-.01em;border-bottom-color:var(--ink)}
-.money .cur-btn{position:absolute;right:0;top:6px;height:32px;min-width:44px;padding:0 6px;border-radius:4px;border:0;background:transparent;color:var(--ink-3);font-size:15px;font-weight:500}
-.money .cur-btn:hover{color:var(--ink)}
-.money .cur-box{position:absolute;right:0;top:calc(100% + 4px);z-index:30;width:min(360px,100%);background:var(--card);border:1px solid var(--line);border-radius:var(--r2);box-shadow:0 12px 32px rgba(17,20,24,.16);padding:6px;display:none}
-.money .rate{margin-top:var(--s3)}
+/* Цена иска — вторая по важности цифра после итога: 28 px с табличными цифрами,
+   чтобы при наборе разряды не «дышали». */
+.money-in > .inp{font-size:var(--t5);line-height:var(--t5l);height:calc(var(--field-h) + 4px);padding-right:56px;
+  font-variant-numeric:tabular-nums lining-nums;font-weight:600;letter-spacing:-.01em;border-bottom-color:var(--ink)}
+.money .cur-btn{position:absolute;right:0;top:2px;height:40px;min-width:44px;padding:0 20px 0 var(--s2);border-radius:var(--r);border:0;
+  background:transparent;color:var(--ink-3);font-size:var(--t3);font-weight:500;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.5 7 9.5 11 5.5' fill='none' stroke='%235b6472' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 2px center}
+.money .cur-btn:hover{color:var(--ink);background:var(--accent-soft)}
+.money .cur-box{position:absolute;right:0;top:calc(100% + 4px);z-index:30;width:min(360px,100%);background:var(--card);border:1px solid var(--line);border-radius:var(--r2);box-shadow:0 12px 32px rgba(20,24,29,.16);padding:6px;display:none}
+.money .rate{margin-top:var(--s4)}
 .money .cur-box.open{display:block}
-.money .cur-box input{width:100%;height:36px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:var(--field);margin-bottom:6px}
+.money .cur-box input{width:100%;height:44px;padding:0 12px;border:1px solid var(--line-2);border-radius:6px;background:var(--field);margin-bottom:6px}
 .money .cur-box .list{max-height:260px;overflow:auto}
-.money .cur-box .opt{display:flex;gap:10px;align-items:center;min-height:40px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:15px;line-height:20px}
+.money .cur-box .opt{display:flex;gap:10px;align-items:center;min-height:44px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:var(--t2);line-height:var(--t2l)}
 .money .cur-box .opt:hover,.money .cur-box .opt.act{background:var(--accent-soft)}
 .money .cur-box .opt .code{flex:none;width:44px;font-weight:600;color:var(--ink-2)}
 .money .cur-box .opt .sym{margin-left:auto;color:var(--ink-3)}
-.rate .inp{font-variant-numeric:tabular-nums}
+.rate .inp{font-variant-numeric:tabular-nums lining-nums}
 
-/* льготы: списки с радиокнопками */
+/* льготы: списки с радиокнопками.
+   Строка не ниже 44 px, кружок 20 px: выбор льготы меняет сумму в разы, и
+   промахнуться пальцем нельзя. Между строками 4 px — цели не слипаются. */
 .more .sum-note{margin-left:8px;color:var(--ink-3);font-weight:400}
-.radios{display:flex;flex-direction:column;gap:2px}
-.radios.sub{margin-top:var(--s2);padding-left:var(--s4);border-left:2px solid var(--line)}
-.radios label{display:flex;gap:10px;align-items:flex-start;padding:7px 8px;border-radius:var(--r);cursor:pointer;font-size:15px;line-height:22px}
-.radios label:hover{background:var(--field)}
-.radios label.on{background:var(--accent-soft)}
-.radios input[type=radio]{margin:5px 0 0;flex:none;width:16px;height:16px;accent-color:var(--accent)}
+.radios{display:flex;flex-direction:column;gap:var(--s1)}
+.radios.sub{margin-top:var(--s3);padding-left:var(--s4);border-left:2px solid var(--line)}
+.radios label{display:flex;gap:var(--s3);align-items:flex-start;min-height:44px;padding:var(--s3) var(--s2);border-radius:var(--r);
+  cursor:pointer;font-size:var(--t2);line-height:var(--t2l);transition:background-color var(--dur-fast) var(--ease)}
+.radios label:hover{background:var(--accent-soft)}
+.radios label.on{background:var(--accent-soft);font-weight:500}
+.radios input[type=radio]{margin:1px 0 0;flex:none;width:20px;height:20px;accent-color:var(--accent)}
 .radios label span{flex:1;min-width:0}
-.radios .q-icon{margin-top:2px}
+.radios .q-icon{margin-top:0}
 
 /* combobox (W3C APG: input role=combobox + listbox под полем) */
 .cb{position:relative}
 .cb .box{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);
-  box-shadow:0 12px 32px rgba(17,20,24,.16);max-height:min(360px,55vh);overflow:auto;display:none;padding:6px}
+  box-shadow:0 12px 32px rgba(20,24,29,.16);max-height:min(400px,60vh);overflow:auto;display:none;padding:6px}
 .cb .box.open{display:block}
 .cb .box.up{top:auto;bottom:calc(100% + 4px)}
-.cb .opt{min-height:44px;padding:10px 12px 10px 14px;border-radius:0;display:flex;gap:10px;align-items:center;cursor:pointer;font-size:16px;line-height:22px;
-  position:relative;transition:color .16s ease,background-color .16s ease}
+.cb .opt{min-height:48px;padding:11px 12px 11px 14px;border-radius:0;display:flex;gap:10px;align-items:center;cursor:pointer;font-size:var(--t3);line-height:var(--t3l);
+  position:relative;transition:color var(--dur-fast) var(--ease),background-color var(--dur-fast) var(--ease)}
 /* выделение строки — тонкая полоса слева: под курсором светлая, у выбранной чернильная */
-.cb .opt:not(.grp)::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:transparent;transition:background-color .16s ease}
-.cb .opt:not(.grp):hover::before{background:var(--line)}
+.cb .opt:not(.grp)::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:transparent;transition:background-color var(--dur-fast) var(--ease)}
+.cb .opt:not(.grp):hover::before{background:var(--line-2)}
 .cb .opt:not(.grp):hover{background:var(--accent-soft)}
 .cb .opt .t{flex:1;min-width:0}
-.cb .opt .t small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:13px;line-height:18px;color:var(--ink-3);overflow:hidden}
-.cb .opt .tag{flex:none;font-size:12px;line-height:20px;padding:0 7px;border-radius:6px;background:var(--field);color:var(--ink-2);font-weight:500}
-.cb .opt .tag.arb{background:#ede9fe;color:#5b21b6}
-.cb .opt .tag.vs{background:#fef3c7;color:#92400e}
-.cb .opt .amt{flex:none;font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.cb .opt .t small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:var(--t1);line-height:var(--t1l);color:var(--ink-3);overflow:hidden}
+.cb .opt .tag{flex:none;font-size:var(--t1);line-height:20px;padding:0 7px;border-radius:6px;background:var(--bg);color:var(--ink-2);font-weight:500}
+.cb .opt .tag.arb{background:#ede9fe;color:#4c1d95}
+.cb .opt .tag.vs{background:#fef3c7;color:#7c3e04}
+.cb .opt .amt{flex:none;font-size:var(--t1);color:var(--ink-3);font-variant-numeric:tabular-nums lining-nums}
 .cb .opt.act{background:transparent;font-weight:600}
 .cb .opt.act::before{background:var(--ink)}
-.cb .opt.grp{min-height:28px;padding:8px 12px 2px;font-size:12px;line-height:16px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;cursor:default}
+.cb .opt.grp{min-height:28px;padding:10px 12px 4px;font-size:var(--t1);line-height:var(--t1l);color:var(--ink-3);font-weight:600;letter-spacing:0;cursor:default}
 .cb .opt.none{color:var(--ink-2);cursor:default;flex-wrap:wrap}
 .cb .opt.none .lnk{margin-left:auto;font-weight:600}
 .cb .opt.recent .t::before{content:"↺  ";color:var(--ink-3)}
@@ -209,147 +319,211 @@ textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:none;overflow:h
 .cb .opt.back{color:var(--accent);min-height:36px}
 
 /* ручное добавление суда */
-.manual{margin-top:var(--s3);padding:var(--s4);border:1px dashed var(--line);border-radius:var(--r2);background:var(--card)}
+.manual{margin-top:var(--s4);padding:var(--s5);border:1px dashed var(--line-2);border-radius:var(--r2);background:var(--card)}
 
 /* назначение и кнопки */
-.purpose-note{margin-top:8px;padding:7px 10px;border-radius:6px;font-size:13px;line-height:18px;background:var(--need-soft);border:1px solid #e6d3a8;color:var(--need)}
-.actions{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s3) 0 0}
+.purpose-note{margin-top:var(--s2);padding:var(--s2) var(--s3);border-radius:6px;font-size:var(--t1);line-height:var(--t1l);background:var(--need-soft);border:1px solid #e6d3a8;color:var(--need)}
+.actions{display:flex;gap:var(--s3);flex-wrap:wrap;margin:var(--s5) 0 0}
 .btn-wrap{display:inline-flex}
-.btn{min-height:44px;padding:0 22px;border-radius:4px;border:1px solid var(--line);background:transparent;color:var(--ink);font-weight:500;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.btn:hover{background:var(--accent-soft)}
+/* Кнопка 48 px: столько у Госуслуг и у Material (48 dp — цель пальца).
+   Раньше было 44 — на границе. */
+.btn{min-height:48px;padding:0 24px;border-radius:var(--r);border:1px solid var(--line-2);background:var(--card);color:var(--ink);
+  font-weight:500;font-size:var(--t2);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{background:var(--accent-soft);border-color:var(--line-2)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn.primary:hover{filter:none;opacity:.88;background:var(--accent)}
-.btn.off{opacity:.45;filter:none;cursor:not-allowed}
+.btn.primary:hover{filter:none;opacity:.9;background:var(--accent)}
+.btn.off{opacity:.5;filter:none;cursor:not-allowed}
 .btn-wrap.off{cursor:not-allowed}
-.btn.off:hover{background:transparent}
-.btn.sm{min-height:40px;font-size:14px;padding:0 14px;font-weight:500}
-details.more{margin-top:var(--s3)}
-details.more>summary{list-style:none;cursor:pointer;color:var(--accent);font-size:15px;line-height:22px;display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
+.btn.off:hover{background:var(--card)}
+.btn.sm{min-height:44px;font-size:var(--t1);padding:0 var(--s4);font-weight:500}
+details.more{margin-top:var(--s4)}
+details.more>summary{list-style:none;cursor:pointer;color:var(--accent);font-size:var(--t2);line-height:var(--t2l);
+  display:inline-flex;gap:var(--s2);align-items:center;flex-wrap:wrap;min-height:44px;padding:var(--s2) 0}
 details.more>summary::-webkit-details-marker{display:none}
-details.more>summary::before{content:"›";display:inline-block;transition:transform .12s;color:var(--ink-3)}
+details.more>summary::before{content:"›";display:inline-block;font-size:var(--t3);transition:transform var(--dur-fast) var(--ease);color:var(--ink-3)}
 details.more[open]>summary::before{transform:rotate(90deg)}
 details.more>div{padding-top:var(--s3)}
 
-/* ─── справка — документ для клиента (всегда светлая) ─── */
-.sheet{background:#fff;color:#111418;border:0;border-radius:0;padding:12px 18px;font-size:14px;line-height:20px}
-.sheet .reqs{font-size:12px;line-height:16px;color:#8a9099;letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
-.sheet .tail{display:flex;gap:18px;align-items:center;margin-top:8px;padding-top:6px;border-top:1px solid #ececea}
+/* ─── справка — документ для клиента ──────────────────────────────
+   Справка оформлена белым листом на светло-сером фоне страницы: до этого
+   она стояла на том же белом, что и форма, теми же линиями и тем же кеглем —
+   шесть агентов из восьми написали, что глаз читает её как третью колонку
+   формы, а не как готовый документ. Рамка и фон снимаются при печати. */
+.sheet{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:var(--r2);
+  padding:var(--s6);font-size:var(--t2);line-height:var(--t2l)}
+.sheet .reqs{font-size:var(--t3);line-height:var(--t3l);color:var(--ink);font-weight:600;letter-spacing:0;text-transform:none;margin:0 0 var(--s3)}
+.sheet .tail{display:flex;gap:var(--s5);align-items:flex-start;margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--line)}
 /* заголовок и дата нужны только на печати: на экране сумма говорит сама за себя */
 .sheet .h{display:none;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
-.sheet .h h3{font-size:22px;line-height:28px;font-weight:600;margin:0}
-.sheet .h .dt{font-size:14px;color:#6b7280;white-space:nowrap}
-.sheet .who{color:#4b5563;margin:0 0 16px}
+.sheet .h h3{font-size:var(--t4);line-height:var(--t4l);font-weight:600;margin:0}
+.sheet .h .dt{font-size:var(--t2);color:var(--ink-3);white-space:nowrap}
+.sheet .who{color:var(--ink-2);margin:0 0 16px}
 .sheet .who div{margin-bottom:2px}
-.sheet .who b{color:#111418;font-weight:600}
-.sheet .ph{color:#9ca3af}
+.sheet .who b{color:var(--ink);font-weight:600}
+.sheet .ph{color:var(--ink-4)}
 /* сумма слева, QR справа — одной строкой наверху справки (Иван 07.09.2026) */
-.sheet .paywrap{display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:8px}
+.sheet .paywrap{display:flex;align-items:center;gap:var(--s6);border-bottom:1px solid var(--line);padding-bottom:var(--s5);margin-bottom:var(--s5)}
 .sheet .paywrap .pay{flex:1 1 auto;min-width:0;border:0;padding:0;margin:0}
-.sheet .paywrap .qrblock{flex:none;max-width:280px;text-align:center}   /* шире не растягиваться: иначе сумма уезжает под код */
-.sheet .pay{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:0 0 12px;border:0;border-bottom:1px solid #111418;border-radius:0;margin-bottom:16px}
-.sheet .pay .s{font-size:44px;line-height:48px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.025em;white-space:nowrap}
-.sheet .pay .s.ph{font-size:20px;line-height:26px;font-weight:500}
-.sheet .pay .s small{display:block;font-size:14px;line-height:20px;font-weight:400;color:#4b5563;margin-top:2px}
-.sheet .free{padding:14px 16px;background:#e9f5ee;border:1px solid #bcdccc;border-radius:var(--r2);color:#14532d;margin-bottom:16px}
-.sheet .free b{display:block;font-size:18px;line-height:24px;margin-bottom:4px}
-/* «к оплате» — своей строкой: рядом с числом оно наезжало на QR (Иван 07.09.2026) */
-.sheet .pay .s small{display:block;font-size:14px;font-weight:400;color:#6b7280;margin:2px 0 0;white-space:nowrap}
-.sheet .pay .due{color:#8a9099;font-size:13px}
-.sheet .qrblock{border:0;border-radius:0;padding:0;text-align:left;margin:0;flex:none}
+.sheet .paywrap .qrblock{flex:none;max-width:282px;text-align:center}   /* шире не растягиваться: иначе сумма уезжает под код */
+.sheet .pay{display:flex;flex-direction:column;align-items:flex-start;gap:0;padding:0;border:0;border-radius:0;margin:0}
+/* Сумма — самое крупное на листе. По 762-П сумма единственный реквизит,
+   который в платёжном поручении печатается дважды и стоит выше получателя. */
+.sheet .pay .s{display:flex;flex-direction:column;align-items:flex-start;font-size:var(--t6);line-height:var(--t6l);font-weight:600;
+  font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.02em;white-space:nowrap}
+.sheet .pay .s.ph{font-size:var(--t3);line-height:var(--t3l);font-weight:500;white-space:normal}
+.sheet .free{padding:var(--s4) var(--s5);background:var(--ok-soft);border:1px solid #bcdccc;border-radius:var(--r2);color:#14532d;margin-bottom:var(--s5)}
+.sheet .free b{display:block;font-size:var(--t4);line-height:var(--t4l);margin-bottom:var(--s1)}
+/* «к оплате» стоит НАД числом маленькой подписью, а не под ним: сначала глаз
+   должен понять, что это за число, потом прочитать само число */
+.sheet .pay .s small{order:-1;display:block;font-size:var(--t1);line-height:var(--t1l);font-weight:500;color:var(--ink-3);
+  margin:0 0 2px;white-space:nowrap;letter-spacing:.02em}
+.sheet .pay .due{color:var(--ink-3);font-size:var(--t1);line-height:var(--t1l);margin-top:var(--s2)}
+.sheet .pay .due b{color:var(--ink);font-weight:600}
+.sheet .qrblock{border:0;border-radius:0;padding:0;text-align:center;margin:0;flex:none}
 /* 250 px ≈ 66 мм на обычном мониторе, клетка ≈ 0,71 мм: с запасом к рекомендации
-   ГОСТ Р 56042-2014 (модуль ≥ 0,4064 мм) и вдвое ниже её потолка в 80 мм */
-.sheet .qrblock svg{display:block;margin:0;width:250px;height:250px;max-width:100%}
-.sheet .qrblock .cap{font-size:12px;line-height:16px;color:#8a9099;margin-top:6px}
-.claim-row .under.norm{margin-top:6px}
+   ГОСТ Р 56042-2014 (модуль ≥ 0,4064 мм) и вдвое ниже её потолка в 80 мм.
+   Белое поле вокруг кода — 16 px: ISO/IEC 18004 требует 4 модуля (≈15 px),
+   стандарт НСПК — не меньше 7 % стороны. Фон под кодом всегда белый. */
+/* Белое поле вокруг кода рисует сам кодировщик: в qrSvg() заложены 4 модуля
+   тишины по ISO/IEC 18004, поэтому своего padding здесь не нужно — он бы
+   удваивал зону тишины и съедал 32 px высоты справки. */
+.sheet .qrblock svg{display:block;margin:0 auto;width:250px;height:250px;max-width:100%;background:#fff}
+.sheet .qrblock .cap{font-size:var(--t1);line-height:var(--t1l);color:var(--ink-3);margin-top:var(--s2)}
+.claim-row .under.norm{margin-top:var(--s2)}
 .claim-row .x{align-self:center}
-@media (max-width:700px){ .claim-two{grid-template-columns:minmax(0,1fr);gap:var(--s2)} }
-.sheet .org{padding:12px 14px;background:#f3f4f6;border-radius:var(--r);color:#4b5563;margin-bottom:16px}
-.sheet h4{font-size:16px;line-height:24px;font-weight:600;margin:0 0 6px}
-/* реквизиты на экране плотнее основного текста — иначе справка не умещается
-   в окно ноутбука. В картинке и PDF свои размеры: они рисуются на canvas. */
-/* Ширины колонок заданы жёстко: при автоматической раскладке длинные значения
-   (банк, назначение) перетягивали колонки на себя, и КПП с ОКТМО переносились
-   на вторую строку — замечание Ивана 07.09.2026, второй раз. */
-.sheet table{width:100%;border-collapse:collapse;margin-bottom:6px;font-size:14px;line-height:19px;table-layout:fixed}
-.sheet col.c-k{width:38%}
-.sheet col.c-v{width:62%}
+.sheet .org{padding:12px 14px;background:var(--bg);border-radius:var(--r);color:var(--ink-2);margin-bottom:16px}
+.sheet h4{font-size:var(--t3);line-height:var(--t3l);font-weight:600;margin:0 0 6px}
+/* Таблица реквизитов. Значения 15 px, номера — моноширинным с табличными
+   цифрами: по 762-П счёт ровно 20 знаков, КБК 20, ОКТМО 11, и их сверяют
+   глазами цифра за цифрой. Разрядку пробелами не делаем — сломается
+   «Скопировать реквизиты». Ширины колонок заданы жёстко: при автоматической
+   раскладке длинные значения перетягивали колонки на себя (замечание Ивана
+   07.09.2026, второй раз). */
+.sheet table{width:100%;border-collapse:collapse;margin-bottom:var(--s3);font-size:var(--t2);line-height:21px;table-layout:fixed}
+.sheet col.c-k{width:34%}
+.sheet col.c-v{width:66%}
 .sheet td{padding:3px 0;border-bottom:0;vertical-align:top}
-.sheet td.k{color:#8a9099;padding-right:12px}
-.sheet td.v{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.sheet td.v.num{font-variant-numeric:tabular-nums}
+.sheet td.k{color:var(--ink-3);padding-right:var(--s4);font-size:var(--t1);line-height:21px}
+.sheet td.v{overflow-wrap:anywhere;color:var(--ink)}
+.sheet td.v.num{font-family:var(--mono);font-size:var(--t2);letter-spacing:.01em;font-variant-numeric:tabular-nums lining-nums;overflow-wrap:normal}
 .sheet tr:last-child td{border-bottom:0}
-.sheet .grp td{border-bottom:0;padding-top:10px;color:#111418;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.04em}
-.sheet .notes{color:#8a9099;font-size:11px;line-height:16px;flex:1 1 0;min-width:0}
-.sheet .notes p{margin:0 0 6px}
+.sheet .grp td{border-bottom:0;padding-top:10px;color:var(--ink);font-weight:600;font-size:var(--t1);text-transform:none;letter-spacing:0}
+.sheet .notes{color:var(--ink-3);font-size:var(--t1);line-height:var(--t1l);flex:1 1 0;min-width:0;max-width:38em}
+.sheet .notes p{margin:0 0 var(--s2)}
+.sheet .notes p:last-child{margin-bottom:0}
 /* Узкий экран: сумма и QR в одну строку не помещаются — ставим друг под друга.
    Порог 700 px, а не 480: на 480-600 сумма 40 px + QR 92 px уже жмут друг друга. */
 @media (max-width:700px){
-  .sheet .paywrap{flex-direction:column;align-items:flex-start;gap:12px}
-  .sheet .paywrap .qrblock{align-self:flex-start;text-align:left}
+  .sheet .paywrap{flex-direction:column;align-items:flex-start;gap:var(--s5)}
+  .sheet .paywrap .qrblock{align-self:center;text-align:center}
 }
 @media (max-width:480px){
-  .sheet{padding:16px 14px}
+  .sheet{padding:var(--s5) var(--s4)}
   .sheet td.k{width:40%}
 }
 
-/* липкая панель телефона */
-.stickybar{position:sticky;bottom:0;z-index:40;margin:0 -16px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--card);
-  border-top:1px solid var(--line);display:flex;align-items:center;gap:12px}
+/* липкая панель телефона.
+   Появляется вместе со вторым шагом и дальше высоту не меняет — раньше она
+   возникала внезапно вместе со справкой и наезжала на поля формы.
+   Подпись под суммой в две строки: суд и суть требования не сокращаются. */
+.stickybar{position:sticky;bottom:0;z-index:40;margin:0 calc(var(--pad) * -1);
+  padding:var(--s3) var(--pad) calc(var(--s3) + env(safe-area-inset-bottom));background:var(--card);
+  border-top:1px solid var(--line);box-shadow:0 -8px 16px rgba(20,24,29,.05);
+  display:flex;align-items:center;gap:var(--s4);min-height:var(--bar-h)}
 .stickybar .sum{flex:1;min-width:0;background:none;border:0;text-align:left;padding:0}
-.stickybar .sum b{display:block;font-size:22px;line-height:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
-.stickybar .sum b.dash{color:var(--ink-3)}
-.stickybar .sum span{display:block;font-size:13px;line-height:18px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stickybar .sum b{display:block;font-size:var(--t5);line-height:var(--t5l);font-weight:600;
+  font-variant-numeric:tabular-nums lining-nums;color:var(--ink);letter-spacing:-.02em}
+.stickybar .sum b.dash{color:var(--ink-4);font-size:var(--t3);line-height:var(--t3l);font-weight:500}
+.stickybar .sum span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font-size:var(--t1);line-height:var(--t1l);color:var(--ink-3);margin-top:2px}
 .stickybar .sum span.need{color:var(--need)}
-.stickybar .btn{flex:none}
+.stickybar .btn{flex:none;min-height:48px;padding:0 var(--s5)}
 
-.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#111418;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;line-height:20px;z-index:70;opacity:0;transition:opacity .15s;pointer-events:none;max-width:90vw;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(var(--bar-h) + 24px);transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:12px 18px;border-radius:10px;font-size:var(--t2);line-height:var(--t2l);z-index:70;opacity:0;
+  transition:opacity var(--dur-fast) var(--ease);pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 #selftest{white-space:pre-wrap;font:12px/16px var(--mono);padding:16px;background:var(--card);color:var(--ink)}
 
-/* ─── телефон и планшет: одна колонка; фокусная прокрутка учитывает липкую панель ─── */
-@media (max-width: 1023px){
-  html{scroll-padding-bottom:96px}
+/* ─── телефон: одна колонка, липкая панель внизу ───
+   scroll-padding-bottom равен высоте панели плюс воздух: при переходе по Tab
+   поле не должно уезжать под панель (WCAG 2.4.11 Focus Not Obscured). */
+@media (max-width: 1179px){
+  html{scroll-padding-bottom:calc(var(--bar-h) + 24px);scroll-padding-top:16px}
+  /* Форма и справка идут одной колонкой, но не во всю ширину планшета:
+     строка длиной 736 px — это около 92 знаков при норме 50-60. */
+  .cols{max-width:640px;margin:0 auto}
+  .top,.foot,.steps{max-width:640px;margin-left:auto;margin-right:auto}
+  .foot{margin-top:var(--s8)}
 }
-/* ─── компьютер: две колонки, форма тянется, справка справа 480 px ─── */
-@media (min-width: 1024px){
-  .app{padding:0 32px 48px}
-  .cols{grid-template-columns:minmax(0,1fr) 560px;gap:40px;align-items:start}
-  #form{max-width:600px}
-  .result{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;padding-right:2px}
-  .stickybar{display:none}
-  :root{--field-h:40px}
+@media (min-width: 600px) and (max-width: 1179px){
+  :root{--pad:24px}
+}
+/* На телефоне вводная фраза нужна только на первом экране: дальше она занимает
+   четверть высоты и мешает работать. Уходит она в тот же момент, когда выбран
+   суд, — то есть вместе с большой перестройкой, которую человек сам вызвал. */
+@media (max-width: 599px){
+  .app.начали .top .intro{display:none}
 }
 
-/* ─── широкий экран: форма в две колонки, чтобы всё умещалось без прокрутки ───
-   Замер 06.09.2026 при 1920×1080: страница была 1351 px при доступных ~890.
-   Справка справа и так прокручивается внутри себя и высоту страницы не задаёт,
-   поэтому режем только форму: 1083 px в одну колонку → около 575 в две.
-   Порог 1400 px: две колонки полей примерно по 390 px плюс справка 480 px и отступы. */
-@media (min-width: 1400px){
-  /* справка шире формы: рядом с суммой должен помещаться крупный QR (Иван 07.09.2026) */
-  .cols{grid-template-columns:minmax(0,1fr) 600px}
-  #form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 40px;align-items:start;max-width:940px}
-  .fcol{min-width:0;max-width:450px}
-  .fcol .q:first-child{border-top:0;padding-top:var(--s2)}
-  /* на очень широком мониторе содержимое не растягивается во всю ширину:
-     иначе между средним столбцом и справкой зияет пустота (Иван 07.09.2026) */
-  .app{padding-bottom:4px;max-width:1640px;margin:0 auto}
-  .result .btn{min-height:40px}
-  .top{padding:6px 0 2px}
-  .top .intro{font-size:12px;line-height:17px;max-width:none}
-  /* подвал — справочный текст: на широком экране он мельче, чтобы страница
-     умещалась в окно ноутбука целиком (замечание Ивана 4 от 07.09.2026) */
-  .foot{padding-top:6px;max-width:none;font-size:11px;line-height:15px}
-  .result .actions{margin-top:var(--s1)}
-  /* Справка не тянет страницу ниже экрана. Когда окно низкое, внутри себя ездит
-     только лист справки — кнопки выдачи остаются на месте. */
-  /* Справка никогда не прокручивается внутри себя (требование Ивана): если она
-     выше окна, едет вся страница. Раньше лист сжимался и получал свою полосу
-     прокрутки — при QR в 250 px это вылезло на ноутбуке 1440×760. */
-  .result{max-height:none;overflow:visible;display:flex;flex-direction:column}
+/* ─── компьютер: две зоны — форма слева, справка справа ───────────
+   Порог 1180 px, а не 1024: при 1024 форме доставалось 360 px, внутри неё пара
+   «вид иска | вид требования» ужималась до 170 px и текст резался (замер
+   08.09.2026). Ниже 1180 всё идёт одной колонкой.
+   Форма — ОДНА колонка (NN/g: 78 % против 42 % отправок с первой попытки).
+   Справка липкая: даже когда форма длиннее экрана, лист виден целиком. */
+@media (min-width: 1180px){
+  :root{--pad:32px; --field-h:44px}
+  .app{padding:0 var(--pad) var(--s12)}
+  /* Пара «форма | справка» стоит по центру страницы: если тянуть форму на всю
+     свободную ширину, между ней и справкой зияет пустота (это и есть
+     «расползается» на 24-дюймовом мониторе). */
+  .cols{grid-template-columns:minmax(0,620px) var(--sheet-w);gap:var(--gap);align-items:start;max-width:none;justify-content:center}
+  #form{max-width:620px}
+  .top,.steps{max-width:none}
+  .foot{max-width:42em}   /* мера строки та же: на широком экране подвал был 180 знаков */
+  .result{position:sticky;top:var(--s6);display:flex;flex-direction:column;max-height:none;overflow:visible}
   .result .actions{flex:none}
-  .sheet{flex:0 0 auto;min-height:0;overflow:visible}
+  .sheet{flex:0 0 auto;min-height:0;overflow:visible;padding:28px}
+  .stickybar{display:none}
+}
+
+/* ─── низкое окно: справка уплотняется, чтобы влезть целиком ───
+   Ноутбуки 1366×768 и 1440×760 — самые ходовые. Правило «справка целиком
+   помещается на экран» держится за счёт уплотнения, а не за счёт прокрутки. */
+@media (min-width: 1180px) and (max-height: 940px){
+  .sheet{padding:20px 24px}
+  .sheet .paywrap{padding-bottom:var(--s3);margin-bottom:var(--s3)}
+  .sheet td{padding:2px 0}
+  .sheet table{line-height:20px}
+  .sheet td.k{line-height:20px}
+  .sheet .reqs{margin-bottom:var(--s2)}
+  .sheet .tail{margin-top:var(--s3);padding-top:var(--s2)}
+  .result{top:var(--s4)}
+  .result .actions{margin-top:var(--s3)}
+  .top{padding:var(--s4) 0 var(--s1)}
+}
+/* Совсем низкое окно (ноутбуки 1366×768 и 1440×760): реквизиты становятся
+   на ступень мельче, QR держим 250 px — это правило проекта. */
+@media (min-width: 1180px) and (max-height: 850px){
+  .sheet{padding:14px 20px}
+  .sheet table{font-size:14px;line-height:18px}
+  .sheet td{padding:1px 0}
+  .sheet td.k{font-size:13px;line-height:18px}
+  .sheet .reqs{font-size:var(--t2);line-height:var(--t2l);margin-bottom:var(--s2)}
+  .sheet .pay .s{font-size:32px;line-height:36px}
+  .sheet .notes{font-size:12px;line-height:16px}
+  /* колонка подписей уже — длинное назначение платежа укладывается в три строки */
+  .sheet col.c-k{width:30%}
+  .sheet col.c-v{width:70%}
+  .sheet .qrblock .cap{margin-top:var(--s1);font-size:12px;line-height:16px}
+  .sheet .paywrap{padding-bottom:var(--s2);margin-bottom:var(--s2)}
+  .sheet .tail{margin-top:var(--s2);padding-top:var(--s2)}
+  .sheet .reqs{margin-bottom:var(--s1)}
+  .result{top:var(--s2)}
+  .result .actions{margin-top:var(--s2)}
+  .result .btn{min-height:40px}
 }
 
 /* ─── печать: только справка ─── */
@@ -358,45 +532,57 @@ details.more>div{padding-top:var(--s3)}
   html,body{background:#fff}
   .no-print,#errbar,#nojs,.pop,.toast{display:none!important}
   .app{padding:0;max-width:none}
-  .cols{display:block}
+  .cols{display:block;max-width:none}
   .result{position:static;max-height:none;overflow:visible}
-  /* всё должно уместиться на одну страницу А4 */
-  .sheet{border:0;border-radius:0;padding:12mm 13mm;font-size:10.5pt;line-height:1.4}
+  /* всё должно уместиться на одну страницу А4. Рамка карточки и серый фон —
+     экранные, на бумаге их нет: лист и так лист. */
+  .sheet{border:0;border-radius:0;padding:12mm 13mm;font-size:10.5pt;line-height:1.4;background:#fff}
   .sheet .h{display:flex;margin-bottom:6px}
   .sheet .tail{display:block;border-top:0;margin-top:8px;padding-top:0}
   .sheet .qrblock{text-align:center}
   .sheet .qrblock svg{margin:0 auto}
   .sheet .h h3{font-size:16pt}
   .sheet .who{margin-bottom:10px}
-  .sheet .pay{padding:10px 14px;margin-bottom:10px}
+  .sheet .pay{padding:0;margin-bottom:10px}
   .sheet .pay .s{font-size:22pt;line-height:1.2}
-  .sheet .qrblock{padding:10px;margin-bottom:10px}
+  .sheet .qrblock{padding:0;margin-bottom:10px}
   .sheet .qrblock svg{width:50mm;height:50mm}
   .sheet table{margin-bottom:8px}
   .sheet td{padding:3px 0}
+  .sheet td.v.num{font-size:10pt}
   .sheet .notes p{margin:0 0 3px}
   .sheet .pay,.sheet .qrblock,.sheet table,.sheet .free,.sheet .notes{break-inside:avoid}
 }
 
-/* ─── пошаговое раскрытие формы (Иван 07.09.2026) ─── */
-/* появление блока: чуть снизу и из прозрачности, той же длительности, что наведение */
-.step-in{animation:шаг .22s ease both}
+/* ─── пошаговое раскрытие формы (Иван 07.09.2026) ─────────────────
+   Появление блока — прозрачность и сдвиг 6 px за 200 мс по кривой
+   «emphasized decelerate» из Material 3. Соседние блоки при этом не двигаются:
+   двигается только тот, что появился. */
+.step-in{animation:шаг var(--dur) var(--ease-out) both}
 @keyframes шаг{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
-/* до четвёртого шага — одна колонка по центру, справки нет.
-   Заголовок и подвал тоже уходят по центру, иначе поле висит само по себе. */
-.app.узко .cols{grid-template-columns:minmax(0,1fr)!important;max-width:600px;margin:0 auto}
-.app.узко #form{display:block!important;max-width:none!important}
-.app.узко .fcol{max-width:none!important}
-.app.узко .top,.app.узко .foot{max-width:600px;margin-left:auto;margin-right:auto}
-.app.узко .top{padding-top:24px}
-.app.узко .foot{padding-top:28px}
-.app.узко .q{padding-top:var(--s4)}
-.app.узко #court{font-size:20px}
-.app.узко .stickybar{display:none}
 
-/* Кому анимация мешает — выключаем (системная настройка) */
+/* ─── заготовка справки ───────────────────────────────────────────
+   Место справки занято с первого экрана: пока считать нечего, на нём стоит
+   бледный контур с подписью. Раньше раскладка перестраивалась в момент, когда
+   появлялась справка, и левый край формы уезжал на 490 px (замер 08.09.2026)
+   ровно тогда, когда человек смотрел в поле «Цена иска». */
+.sheet-ghost{border:1px dashed var(--line-2);border-radius:var(--r2);background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s4);
+  min-height:420px;padding:var(--s6);text-align:center;color:var(--ink-3);font-size:var(--t2);line-height:var(--t2l)}
+.sheet-ghost .qr-ph{width:180px;height:180px;border-radius:var(--r);background:
+  repeating-linear-gradient(45deg,var(--bg) 0 8px,var(--card) 8px 16px);border:1px solid var(--line)}
+@media (max-width: 1179px){ .sheet-ghost{display:none} }
+
+/* Пересчёт суммы: меняется только прозрачность числа, QR подменяется мгновенно
+   (иначе он мельтешит). 180 мс — «мгновенно» по порогу восприятия. */
+.sheet .pay .s.recalc{animation:пересчёт 180ms var(--ease) both}
+@keyframes пересчёт{from{opacity:.35}to{opacity:1}}
+
+/* Кому анимация мешает — выключаем (системная настройка).
+   0,01 мс, а не none: при нулевой длительности не приходят события окончания. */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+  html{scroll-behavior:auto!important}
 }
 
 </style>
@@ -423,6 +609,9 @@ details.more>div{padding-top:var(--s3)}
       </div>
     </div>
     <p class="intro">Данный сервис позволяет рассчитать размер госпошлины за обращение в суд и сформировать справку для оплаты — с реквизитами и QR-кодом.</p>
+    <!-- Полоса шагов: видно, где человек сейчас и сколько осталось. Высота у неё
+         постоянная во всех состояниях, поэтому при переходе ничего не прыгает. -->
+    <nav class="steps" id="steps" aria-label="Шаги расчёта"></nav>
   </div>
 
   <div class="cols">
@@ -529,10 +718,17 @@ details.more>div{padding-top:var(--s3)}
   </section>
 
   <!-- ═══ результат ═══ -->
-  <aside class="result" id="result" data-шаг="6">
+  <!-- Место справки занято с первого экрана: пока считать нечего, здесь стоит
+       бледная заготовка. Так раскладка не перестраивается в тот момент, когда
+       человек вводит цену иска (раньше форма уезжала влево на 490 px). -->
+  <aside class="result" id="result">
+    <div class="sheet-ghost no-print" id="sheet-ghost">
+      <div class="qr-ph" aria-hidden="true"></div>
+      <div>Здесь появится сумма госпошлины,<br>реквизиты и QR-код для оплаты</div>
+    </div>
     <!-- Справка начинается сверху, кнопка под ней (Иван 07.09.2026) -->
-    <div class="sheet" id="sheet"></div>
-    <div class="actions no-print" id="actions">
+    <div class="sheet" id="sheet" data-шаг="6"></div>
+    <div class="actions no-print" id="actions" data-шаг="6">
       <span class="btn-wrap" id="wrap-pdf"><button type="button" class="btn primary" id="btn-pdf">Сохранить PDF</button></span>
       <span class="btn-wrap" id="wrap-copy"><button type="button" class="btn" id="btn-copy">Скопировать реквизиты</button></span>
     </div>
@@ -564,7 +760,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.126", дата:"2026-09-07", коммит:"44960cf", сумма:"9325ba6484"};
+const СБОРКА = {версия:"2.0.143", дата:"2026-09-08", коммит:"e202fd8", сумма:"f2836091ab"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -13533,6 +13729,8 @@ function нужныйШаг(){
   if(!готово(нх)) return 5;                             // 5 — назначение
   return 6;                                             // 6 — справка и выдача
 }
+/** Названия шагов для полосы под заголовком. Их пять: шестой — уже результат. */
+const ШАГИ = ["Суд", "Обращение", "Требования", "Стороны", "Назначение"];
 /** Показать блоки до достигнутого шага, остальные спрятать. */
 function применитьШаг(){
   S.шаг = Math.max(S.шаг || 1, нужныйШаг());
@@ -13544,8 +13742,26 @@ function применитьШаг(){
     if(надо && !было && !мгновенно){ el.classList.remove("step-in"); void el.offsetWidth; el.classList.add("step-in"); }
     if(мгновенно) el.classList.remove("step-in");
   }
-  // до четвёртого шага форма стоит одной колонкой по центру — экран не пустует
-  $("#app").classList.toggle("узко", S.шаг < 4);
+  // Заготовка справки стоит на месте будущего листа, пока считать нечего.
+  // Раскладка при этом не перестраивается — левый край формы не двигается.
+  const призрак = $("#sheet-ghost"); if(призрак) призрак.hidden = S.шаг >= 6;
+  // Липкая панель телефона появляется вместе со вторым шагом и дальше высоту
+  // не меняет: раньше она возникала внезапно и наезжала на поля формы.
+  $("#stickybar").hidden = S.шаг < 2;
+  // на телефоне вводная фраза уходит, как только начали заполнять (см. CSS)
+  $("#app").classList.toggle("начали", S.шаг >= 2);
+  рисоватьШаги();
+}
+/** Полоса шагов: пройденные, текущий и будущие. Высота постоянная. */
+function рисоватьШаги(){
+  const box = $("#steps"); if(!box) return;
+  const тек = Math.min(S.шаг, ШАГИ.length);
+  const html = ШАГИ.map((назв, i) => {
+    const n = i + 1;
+    const кл = n < тек ? "done" : (n === тек ? "now" : "");
+    return `<b class="${кл}"${n === тек ? ' aria-current="step"' : ""}>${экр(назв)}</b>`;
+  }).join('<i aria-hidden="true">·</i>');
+  if(box.dataset.h !== html){ box.innerHTML = html; box.dataset.h = html; }
 }
 
 /** Поле назначения не тянется мышью — высота подгоняется под текст (Иван 07.09.2026) */
@@ -13577,7 +13793,9 @@ function рисоватьКнопки(к, нх, с){
   const нетСуммы = нх.includes("суд") || нх.includes("требование") || нх.includes("цена") || нх.includes("курс");
   const ноль = !нетСуммы && к.итог === 0;
   const ss = $("#sticky-sum"); const b = ss.querySelector("b"), sp = ss.querySelector("span");
-  b.textContent = нетСуммы ? "—" : ноль ? "0 ₽" : рубТочно(к.итог); b.classList.toggle("dash", нетСуммы);
+  b.textContent = нетСуммы ? "Сумма появится ниже" : ноль ? "0 ₽" : рубТочно(к.итог); b.classList.toggle("dash", нетСуммы);
+  // Подпись под суммой идёт в две строки и не сокращается: суд и суть требования
+  // резать нельзя (правило проекта), а на 320-375 px в одну строку они не влезают.
   sp.textContent = нх.length ? почему : описаниеКоротко(с); sp.classList.toggle("need", !!нх.length);
 }
 
@@ -13634,6 +13852,14 @@ function рисоватьСправку(к, нх, с){
   html += `<div class="tail">
     <div class="notes">${сQR && ст === "юр" ? `<p>Оплата по QR-коду доступна не во всех банках для бизнеса — после сканирования сверьте реквизиты.</p>` : ""}${с && с.мировой ? `<p>${экр(пометкаМирового(с))}${с.сайт ? ` Сайт участка: ${экр(с.сайт)}` : ""}</p>` : ""}<p>После оплаты, пожалуйста, пришлите платёжный документ — он нужен для обращения в суд.</p>${S.контакты ? `<p>${экр(S.контакты)}</p>` : ""}</div></div>`;
   $("#sheet").innerHTML = html;
+  // Пересчёт суммы заметен: число проявляется за 180 мс. QR подменяется мгновенно,
+  // иначе при каждой правке цены иска он мельтешит (замечание агентов 08.09.2026).
+  const цифра = $("#sheet .pay .s");
+  if(цифра){
+    const текст = цифра.textContent;
+    if(S.прошлаяСумма !== undefined && S.прошлаяСумма !== текст) цифра.classList.add("recalc");
+    S.прошлаяСумма = текст;
+  }
 
   clearTimeout(S.таймерQR);
   if(естьQR){
