@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.166 2026-09-08 fc4c194 b9edb81cc9">
+<meta name="build" content="2.0.176 2026-09-08 eccee3d b7401ca88a">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
@@ -140,6 +140,7 @@ a{color:var(--accent)}
    на две строки на 320 px), поэтому у строки заголовка постоянная высота. */
 .top-row{display:flex;align-items:center;justify-content:space-between;gap:var(--s4);min-height:44px}
 .top-row h1{flex:1 1 auto;min-width:0}
+.top-actions{display:flex;align-items:center;gap:var(--s2);flex:none}
 .recent-wrap{position:relative;flex:none}
 .recent-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:60;width:min(380px,calc(100vw - 32px));
   background:var(--card);border:1px solid var(--line);border-radius:var(--r2);box-shadow:0 10px 30px rgba(20,24,29,.14);
@@ -368,8 +369,8 @@ details.more>div{padding-top:var(--s3)}
    шесть агентов из восьми написали, что глаз читает её как третью колонку
    формы, а не как готовый документ. Рамка и фон снимаются при печати. */
 .sheet{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:var(--r2);
-  padding:var(--s6);font-size:var(--t2);line-height:var(--t2l)}
-.sheet .reqs{font-size:var(--t3);line-height:var(--t3l);color:var(--ink);font-weight:600;letter-spacing:0;text-transform:none;margin:0 0 var(--s3)}
+  padding:var(--s5) var(--s6);font-size:var(--t1);line-height:var(--t1l)}
+.sheet .reqs{font-size:var(--t2);line-height:var(--t2l);color:var(--ink);font-weight:600;letter-spacing:0;text-transform:none;margin:0 0 var(--s2)}
 .sheet .tail{display:flex;gap:var(--s5);align-items:flex-start;margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--line)}
 /* заголовок и дата нужны только на печати: на экране сумма говорит сама за себя */
 .sheet .h{display:none;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
@@ -386,11 +387,11 @@ details.more>div{padding-top:var(--s3)}
 .sheet .pay{display:flex;flex-direction:column;align-items:flex-start;gap:0;padding:0;border:0;border-radius:0;margin:0}
 /* Сумма — самое крупное на листе. По 762-П сумма единственный реквизит,
    который в платёжном поручении печатается дважды и стоит выше получателя. */
-.sheet .pay .s{display:flex;flex-direction:column;align-items:flex-start;font-size:var(--t6);line-height:var(--t6l);font-weight:600;
+.sheet .pay .s{display:flex;flex-direction:column;align-items:flex-start;font-size:34px;line-height:38px;font-weight:600;
   font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.02em;white-space:nowrap}
 .sheet .pay .s.ph{font-size:var(--t3);line-height:var(--t3l);font-weight:500;white-space:normal}
-.sheet .free{padding:var(--s4) var(--s5);background:var(--ok-soft);border:1px solid #bcdccc;border-radius:var(--r2);color:#14532d;margin-bottom:var(--s5)}
-.sheet .free b{display:block;font-size:var(--t4);line-height:var(--t4l);margin-bottom:var(--s1)}
+.sheet .free{padding:var(--s4);background:var(--ok-soft);border:1px solid #bcdccc;border-radius:var(--r2);color:#14532d;margin-bottom:var(--s5)}
+.sheet .free b{display:block;font-size:var(--t3);line-height:var(--t3l);margin-bottom:var(--s1)}
 /* «к оплате» стоит НАД числом маленькой подписью, а не под ним: сначала глаз
    должен понять, что это за число, потом прочитать само число */
 .sheet .pay .s small{order:-1;display:block;font-size:var(--t1);line-height:var(--t1l);font-weight:500;color:var(--ink-3);
@@ -413,20 +414,20 @@ details.more>div{padding-top:var(--s3)}
 .claim-row .under.norm{margin-top:var(--s2)}
 .claim-row .x{align-self:center}
 .sheet .org{padding:12px 14px;background:var(--bg);border-radius:var(--r);color:var(--ink-2);margin-bottom:16px}
-.sheet h4{font-size:var(--t3);line-height:var(--t3l);font-weight:600;margin:0 0 6px}
+.sheet h4{font-size:var(--t2);line-height:var(--t2l);font-weight:600;margin:0 0 6px}
 /* Таблица реквизитов. Значения 15 px, номера — моноширинным с табличными
    цифрами: по 762-П счёт ровно 20 знаков, КБК 20, ОКТМО 11, и их сверяют
    глазами цифра за цифрой. Разрядку пробелами не делаем — сломается
    «Скопировать реквизиты». Ширины колонок заданы жёстко: при автоматической
    раскладке длинные значения перетягивали колонки на себя (замечание Ивана
    07.09.2026, второй раз). */
-.sheet table{width:100%;border-collapse:collapse;margin-bottom:var(--s3);font-size:var(--t2);line-height:21px;table-layout:fixed}
+.sheet table{width:100%;border-collapse:collapse;margin-bottom:var(--s3);font-size:14px;line-height:20px;table-layout:fixed}
 .sheet col.c-k{width:40%}
 .sheet col.c-v{width:60%}
 .sheet td{padding:3px 0;border-bottom:0;vertical-align:top}
-.sheet td.k{color:var(--ink-3);padding-right:var(--s4);font-size:var(--t1);line-height:21px}
+.sheet td.k{color:var(--ink-3);padding-right:var(--s4);font-size:var(--t1);line-height:20px}
 .sheet td.v{overflow-wrap:anywhere;color:var(--ink)}
-.sheet td.v.num{font-family:var(--mono);font-size:var(--t2);letter-spacing:.01em;font-variant-numeric:tabular-nums lining-nums;overflow-wrap:normal}
+.sheet td.v.num{font-family:var(--mono);font-size:14px;letter-spacing:.01em;font-variant-numeric:tabular-nums lining-nums;overflow-wrap:normal}
 .sheet tr:last-child td{border-bottom:0}
 .sheet .grp td{border-bottom:0;padding-top:10px;color:var(--ink);font-weight:600;font-size:var(--t1);text-transform:none;letter-spacing:0}
 .sheet .notes{color:var(--ink-3);font-size:var(--t1);line-height:var(--t1l);flex:1 1 0;min-width:0;max-width:38em}
@@ -532,7 +533,7 @@ details.more>div{padding-top:var(--s3)}
    Ноутбуки 1366×768 и 1440×760 — самые ходовые. Правило «справка целиком
    помещается на экран» держится за счёт уплотнения, а не за счёт прокрутки. */
 @media (min-width: 900px) and (max-height: 940px){
-  .sheet{padding:20px 24px}
+  .sheet{padding:18px 22px}
   .sheet .paywrap{padding-bottom:var(--s3);margin-bottom:var(--s3)}
   .sheet td{padding:2px 0}
   .sheet table{line-height:20px}
@@ -546,12 +547,12 @@ details.more>div{padding-top:var(--s3)}
 /* Совсем низкое окно (ноутбуки 1366×768 и 1440×760): реквизиты становятся
    на ступень мельче, QR держим 250 px — это правило проекта. */
 @media (min-width: 900px) and (max-height: 850px){
-  .sheet{padding:14px 20px}
-  .sheet table{font-size:14px;line-height:18px}
+  .sheet{padding:14px 18px}
+  .sheet table{line-height:18px}
   .sheet td{padding:1px 0}
   .sheet td.k{font-size:13px;line-height:18px}
   .sheet .reqs{font-size:var(--t2);line-height:var(--t2l);margin-bottom:var(--s2)}
-  .sheet .pay .s{font-size:32px;line-height:36px}
+  .sheet .pay .s{font-size:30px;line-height:34px}
   .sheet .notes{font-size:12px;line-height:16px}
   /* колонка подписей уже — длинное назначение платежа укладывается в три строки */
   .sheet col.c-k{width:30%}
@@ -648,9 +649,14 @@ details.more>div{padding-top:var(--s3)}
       <h1>Госпошлина в суд</h1>
       <!-- Недавние справки свёрнуты в кнопку (Иван 07.09.2026): место экономится,
            список раскрывается по щелчку и там же «Очистить». -->
-      <div class="recent-wrap" id="recent-wrap" hidden>
-        <button type="button" class="btn sm" id="recent-btn" aria-expanded="false" aria-controls="recent">Недавние</button>
-        <div class="recent-pop" id="recent" role="dialog" hidden></div>
+      <div class="top-actions">
+        <!-- «Сбросить» — начать с чистого листа. Прежний расчёт при этом уходит
+             в «Недавние», поэтому кнопка безопасна (Иван 08.09.2026). -->
+        <button type="button" class="btn sm" id="reset-btn" hidden>Сбросить</button>
+        <div class="recent-wrap" id="recent-wrap" hidden>
+          <button type="button" class="btn sm" id="recent-btn" aria-expanded="false" aria-controls="recent">Недавние</button>
+          <div class="recent-pop" id="recent" role="dialog" hidden></div>
+        </div>
       </div>
     </div>
     <p class="intro">Данный сервис позволяет рассчитать размер госпошлины за обращение в суд и сформировать справку для оплаты — с реквизитами и QR-кодом.</p>
@@ -806,7 +812,7 @@ details.more>div{padding-top:var(--s3)}
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.166", дата:"2026-09-08", коммит:"fc4c194", сумма:"b9edb81cc9"};
+const СБОРКА = {версия:"2.0.176", дата:"2026-09-08", коммит:"eccee3d", сумма:"b7401ca88a"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -12648,93 +12654,113 @@ function строкиТекста(ctx, текст, ширина){
   return out;
 }
 
-/** Собрать картинку справки (минимализм: заголовок → реквизиты → сумма и срок → QR → приписка).
+/** Собрать картинку справки — тем же макетом, что и на экране (Иван 08.09.2026:
+ *  «нужно сделать выгружаемую справку в таком же стиле»). Порядок: заголовок и
+ *  дата → слева «к оплате», сумма, срок и приписка, справа QR → «Реквизиты для
+ *  оплаты» и таблица. Размеры кратны экранным примерно в 1,9 раза: холст 1080 px
+ *  против листа 560 px на экране.
  *  Возвращает canvas 1080 × (не ниже 1350), высота по содержимому. */
 function собратьКартинку(){
   const с = суд(), к = расчёт(), ст = статус(), назн = назначение();
-  const W = 1080, H = 2600, P = 64, МИН_ВЫСОТА = 1350;
+  const W = 1080, H = 2600, P = 48, МИН_ВЫСОТА = 1350;
+  const ЧЕРНИЛА = "#14181d", СЕРЫЙ = "#5b6472", ЛИНИЯ = "#dfe3e9";
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const ctx = cv.getContext("2d");
-  const шрифт = (w, px, mono) => { ctx.font = `${w} ${px}px ${mono ? "ui-monospace, Consolas, Menlo, monospace" : '-apple-system, "Segoe UI", system-ui, Roboto, Arial, sans-serif'}`; };
+  const шрифт = (w, px, mono) => { ctx.font = `${w} ${px}px ${mono ? 'ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace' : '-apple-system, "Segoe UI", system-ui, Roboto, Arial, sans-serif'}`; };
+  const черта = (y) => { ctx.fillStyle = ЛИНИЯ; ctx.fillRect(P, y, W - 2*P, 1); };
   ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, W, H);
   ctx.textBaseline = "top";
   let y = P;
-  шрифт(600, 44); ctx.fillStyle = "#111418"; ctx.fillText("Справка по оплате госпошлины", P, y);
-  шрифт(400, 26); ctx.fillStyle = "#6b7280"; const д = датаСловами(S.датаРасчёта || сегодняISO()); ctx.fillText(д, W - P - ctx.measureText(д).width, y + 14);
-  y += 72; ctx.fillStyle = "#111418"; ctx.fillRect(P, y, W - 2*P, 2); y += 22;
+
+  // ── шапка ──
+  шрифт(600, 40); ctx.fillStyle = ЧЕРНИЛА; ctx.fillText("Справка по оплате госпошлины", P, y);
+  шрифт(400, 24); ctx.fillStyle = СЕРЫЙ;
+  const д = датаСловами(S.датаРасчёта || сегодняISO()); ctx.fillText(д, W - P - ctx.measureText(д).width, y + 12);
+  y += 62;
+
   const ноль = к.итог === 0;
-  const кол = 300;
-  const строка = (k, v, mono) => {
-    шрифт(400, 24); ctx.fillStyle = "#6b7280"; ctx.fillText(k, P, y + 2);
-    шрифт(400, 26, mono); ctx.fillStyle = "#111418";      // без жира: выделение реквизитов лишнее (Иван 07.09.2026)
-    const ss = строкиТекста(ctx, v, W - 2*P - кол); ss.forEach((t, i) => ctx.fillText(t, P + кол, y + i*32));
-    y += Math.max(1, ss.length)*32 + 10;
-    ctx.fillStyle = "#eef0f3"; ctx.fillRect(P, y - 4, W - 2*P, 1);
+  if(ноль){
+    ctx.fillStyle = "#e9f5ee"; ctx.beginPath(); ctx.roundRect(P, y, W - 2*P, 150, 16); ctx.fill();
+    шрифт(600, 34); ctx.fillStyle = "#14532d"; ctx.fillText("Государственная пошлина не уплачивается", P + 28, y + 26);
+    шрифт(400, 24); ctx.fillStyle = "#2f5d43";
+    const осн = к.основание ? к.основание[1] : (к.льгота.id !== "нет" ? к.льгота.назв : "пошлина не взимается по норме НК РФ");
+    строкиТекста(ctx, осн, W - 2*P - 56).slice(0, 2).forEach((t, i) => ctx.fillText(t, P + 28, y + 84 + i*30));
+    y += 182;
+  } else {
+    // ── верхний блок: слева сумма и срок, справа QR ──
+    // QR 400 px на холсте 1080 при вписывании в А4 во всю ширину даёт около
+    // 78 мм — под потолком ГОСТ Р 56042-2014 (80 мм) и вдвое выше минимума
+    // НСПК (35 мм). Клетка целая в пикселях: при дробной модули «плывут» и
+    // OpenCV перестаёт читать код из картинки (поймано проверкой 07.09.2026).
+    let размер = 0, x0 = 0;
+    let qr = null;
+    if(с && с.октмо){
+      const payload = собратьPayload({суд:с, кбк:ВЕТКИ[с.ветка].кбк, сумма:к.итог, назначение:назн, фио:S.плательщик, статус:ст, кодировка:"cp1251"});
+      qr = qrEncode(toCp1251(payload).bytes, "M");
+      const клетка = Math.floor(400 / (qr.size + 8));       // «+ 8» — зона тишины 4 модуля (ГОСТ Р ИСО/МЭК 18004-2015, п. 6.3.8)
+      размер = клетка * (qr.size + 8);
+      x0 = W - P - размер;
+      ctx.fillStyle = "#fff"; ctx.fillRect(x0, y, размер, размер);
+      ctx.fillStyle = "#000";
+      for(let r = 0; r < qr.size; r++) for(let c2 = 0; c2 < qr.size; c2++)
+        if(qr.matrix[r][c2]) ctx.fillRect(x0 + (c2 + 4)*клетка, y + (r + 4)*клетка, клетка, клетка);
+      шрифт(400, 22); ctx.fillStyle = СЕРЫЙ;
+      const cap = "Оплата по QR-коду";
+      ctx.fillText(cap, x0 + (размер - ctx.measureText(cap).width)/2, y + размер + 10);
+    }
+    const левая = (размер ? x0 - 40 : W - P) - P;           // ширина левого столбца
+    let ly = y + 4;
+    шрифт(500, 22); ctx.fillStyle = СЕРЫЙ; ctx.fillText("к оплате", P, ly); ly += 30;
+    шрифт(600, 64); ctx.fillStyle = ЧЕРНИЛА; ctx.fillText(рубТочно(к.итог), P, ly); ly += 78;
+    шрифт(400, 24); ctx.fillStyle = СЕРЫЙ;
+    ctx.fillText(`до ${датаРус(S.датаРасчёта || сегодняISO())} включительно`, P, ly); ly += 46;
+    // приписки — под суммой, в левом столбце: справа их закрывает код
+    шрифт(400, 22); ctx.fillStyle = СЕРЫЙ;
+    const приписки = [];
+    if(ст === "юр" && размер) приписки.push("Оплата по QR-коду доступна не во всех банках для бизнеса — после сканирования сверьте реквизиты.");
+    if(с && с.мировой) приписки.push(пометкаМирового(с));
+    приписки.push(неразрывно("После оплаты, пожалуйста, пришлите платёжный документ — он нужен для обращения в суд."));
+    if(S.контакты) приписки.push(S.контакты);
+    приписки.forEach(t => строкиТекста(ctx, t, левая).forEach(стр => { ctx.fillText(стр, P, ly); ly += 28; }));
+    y = Math.max(ly + 12, размер ? y + размер + 50 : y);
+    черта(y); y += 28;
+  }
+
+  // ── реквизиты ──
+  шрифт(600, 30); ctx.fillStyle = ЧЕРНИЛА; ctx.fillText(ноль ? "Обращение" : "Реквизиты для оплаты", P, y);
+  y += 46;
+  const кол = Math.round((W - 2*P) * 0.4);
+  const строка = (k2, v, mono) => {
+    шрифт(400, 24); ctx.fillStyle = СЕРЫЙ; ctx.fillText(k2, P, y + 3);
+    шрифт(400, mono ? 26 : 27, mono); ctx.fillStyle = ЧЕРНИЛА;
+    const ss = строкиТекста(ctx, v, W - 2*P - кол); ss.forEach((t, i) => ctx.fillText(t, P + кол, y + i*36));
+    y += Math.max(1, ss.length)*36 + 4;
   };
   if(ноль){
-    ctx.fillStyle = "#e9f5ee"; ctx.beginPath(); ctx.roundRect(P, y, W - 2*P, 150, 20); ctx.fill();
-    шрифт(700, 40); ctx.fillStyle = "#14532d"; ctx.fillText("Пошлина не уплачивается", P + 32, y + 26);
-    шрифт(400, 24); ctx.fillStyle = "#4b5563";
-    const осн = к.основание ? к.основание[1] : (к.льгота.id !== "нет" ? к.льгота.назв : "пошлина не взимается по норме НК РФ");
-    строкиТекста(ctx, осн, W - 2*P - 64).slice(0, 2).forEach((t, i) => ctx.fillText(t, P + 32, y + 82 + i*30));
-    y += 182;
     строка("Плательщик", S.плательщик || "—");
     строка("Обращение", назн || "—");
+    шрифт(400, 22); ctx.fillStyle = СЕРЫЙ;
+    y += 16;
+    строкиТекста(ctx, неразрывно("После оплаты, пожалуйста, пришлите платёжный документ — он нужен для обращения в суд."), W - 2*P)
+      .forEach(t => { ctx.fillText(t, P, y); y += 28; });
   } else {
     строка("Получатель", ФНС.получатель);
     строка("ИНН", ФНС.инн, true); строка("КПП", ФНС.кпп, true);
     строка("Счёт получателя", ФНС.счёт, true);
     строка("Банк получателя", ФНС.банк);
     строка("БИК", ФНС.бик, true);
-    строка("Счёт банка (ЕКС)", ФНС.корсчёт, true);
+    строка("Счёт банка получателя (ЕКС)", ФНС.корсчёт, true);
     строка("КБК", с ? ВЕТКИ[с.ветка].кбк : "—", true);
     строка("ОКТМО", с && с.октмо ? с.октмо : "—", true);
     строка("Плательщик", S.плательщик || "—");   // платит один; соистец — только в назначении
     строка("Назначение платежа", назн || "—");
-    y += 20;
-    // сумма и срок
-    ctx.fillStyle = "#f3f4f6"; ctx.beginPath(); ctx.roundRect(P, y, W - 2*P, 150, 20); ctx.fill();
-    шрифт(700, 60); ctx.fillStyle = "#111418"; ctx.fillText(рубТочно(к.итог), P + 32, y + 24);
-    шрифт(400, 26); ctx.fillStyle = "#4b5563"; ctx.fillText(`Оплатить до ${датаРус(S.датаРасчёта || сегодняISO())} включительно`, P + 32, y + 100);
-    y += 150 + 28;
-    if(с && с.октмо){                      // QR и организациям (Иван 07.09.2026)
-      const payload = собратьPayload({суд:с, кбк:ВЕТКИ[с.ветка].кбк, сумма:к.итог, назначение:назн, фио:S.плательщик, статус:ст, кодировка:"cp1251"});
-      const qr = qrEncode(toCp1251(payload).bytes, "M");
-      /* Размер по ГОСТ Р 56042-2014, п. 5.4.3.1 «Рекомендуемые параметры»:
-         модуль не меньше 0,4064 мм (16 мил), символ не больше 80 мм в одном
-         направлении. Сам размер стандарт отдаёт на усмотрение (раздел 1: «не
-         рассматривается выбор поставщиком услуг размера Х»), обязательна только
-         свободная зона 4 модуля — ГОСТ Р ИСО/МЭК 18004-2015, п. 6.3.8; она у нас
-         заложена в «+ 8».
-         320 px на холсте 1080 px при печати на А4 дают символ около 50 мм и
-         модуль около 0,5 мм — обе рекомендации выполнены с запасом. До 07.09.2026
-         стояло 560 px, а это 98 мм: за пределом рекомендации.
-         Клетка целая в пикселях: при дробной модули «плывут» и OpenCV перестаёт
-         читать код из картинки (поймано проверкой выдачи 07.09.2026). */
-      const клетка = Math.floor(320 / (qr.size + 8)), размер = клетка * (qr.size + 8);
-      const x0 = Math.round((W - размер) / 2), y0 = y;
-      ctx.fillStyle = "#fff"; ctx.fillRect(x0, y0, размер, размер);
-      ctx.fillStyle = "#000";
-      for(let r = 0; r < qr.size; r++) for(let c2 = 0; c2 < qr.size; c2++) if(qr.matrix[r][c2]) ctx.fillRect(x0 + (c2 + 4)*клетка, y0 + (r + 4)*клетка, клетка, клетка);
-      шрифт(400, 24); ctx.fillStyle = "#6b7280"; const cap = "Оплата по QR-коду"; ctx.fillText(cap, (W - ctx.measureText(cap).width) / 2, y0 + размер + 8);
-      y += размер + 56;
-      if(ст === "юр"){
-        const орг = "Читают не все банки для бизнеса — после сканирования сверьте реквизиты.";
-        ctx.fillText(орг, (W - ctx.measureText(орг).width) / 2, y - 20);
-        y += 12;
-      }
-    }
   }
-  // приписка и контакты
-  шрифт(400, 22); ctx.fillStyle = "#6b7280";
-  const подвал = [неразрывно("После оплаты, пожалуйста, пришлите платёжный документ — он нужен для обращения в суд."), S.контакты || ""].filter(Boolean);
-  const строкиПодвала = [];
-  подвал.forEach(t => строкиПодвала.push(...строкиТекста(ctx, t, W - 2*P).slice(0, 2)));
-  let fy = Math.max(y + 8, МИН_ВЫСОТА - P - строкиПодвала.length*30);
-  строкиПодвала.forEach((t, i) => ctx.fillText(t, P, fy + i*30));
-  const итогВысота = Math.max(МИН_ВЫСОТА, Math.ceil(fy + строкиПодвала.length*30 + P));
+
+  const итогВысота = Math.max(МИН_ВЫСОТА, Math.ceil(y + P));
   const итог = document.createElement("canvas"); итог.width = W; итог.height = Math.min(H, итогВысота);
-  итог.getContext("2d").drawImage(cv, 0, 0);
+  const ictx = итог.getContext("2d");
+  ictx.fillStyle = "#fff"; ictx.fillRect(0, 0, итог.width, итог.height);
+  ictx.drawImage(cv, 0, 0);
   return итог;
 }
 
@@ -12839,9 +12865,12 @@ async function сохранитьPDF(){
 }
 
 /* ——— история на устройстве ——— */
-function записатьИсторию(){
+/** @param принудительно — записать даже незаконченный расчёт (нажали «Сбросить»:
+ *  человек начинает заново, но потерять начатое не должен, Иван 08.09.2026). */
+function записатьИсторию(принудительно){
   if(!ПАМЯТЬ.включена()) return;
-  const с = суд(); if(!с || !S.плательщик.trim()) return;      // неполную справку в историю не пишем
+  const с = суд(); if(!с) return;                              // без суда записывать нечего
+  if(!принудительно && !S.плательщик.trim()) return;           // неполную справку сама по себе в историю не пишем
   const к = расчёт();
   const запись = {когда:сегодняISO(), судId:S.судId, обращение:S.обращение, требования:S.требования.map(в => ({id:в.id, цена:в.цена, валюта:в.валюта || "RUB", курс:в.курс || 0, суть:в.суть || "", сутьПравлена:!!в.сутьПравлена})),
                   льгота:S.льгота, основание:S.основание, плательщик:S.плательщик, статус:S.статус, соистец:S.соистецВкл ? S.соистец : "",
@@ -12858,26 +12887,21 @@ function записатьИсторию(){
 function рисоватьНедавние(){
   const el = $("#recent"), обёртка = $("#recent-wrap"); if(!el || !обёртка) return;
   const список = (ПАМЯТЬ.включена() ? ПАМЯТЬ.json("history", []) : []).filter(h => судПоId(h.судId));
-  const черновик = ПАМЯТЬ.включена() && естьЧерновик();
-  обёртка.hidden = !список.length && !черновик;
+  // Строки «Продолжить заполнение» больше нет: с 08.09.2026 форма сама
+  // открывается там, где её оставили, а начать заново — кнопка «Сбросить».
+  обёртка.hidden = !список.length;
   if(обёртка.hidden){ закрытьНедавние(); el.innerHTML = ""; return; }
   el.innerHTML = "";
-  // Незаконченный расчёт — первой строкой: страницу могли закрыть случайно или
-  // у телефона сел заряд (Иван 07.09.2026). Сама форма всегда открывается чистой.
-  if(черновик){
-    const d = document.createElement("div"); d.className = "rc draft";
-    d.innerHTML = `<button type="button" class="main" title="Вернуться к незаконченному расчёту"><b>Продолжить заполнение</b><span>${экр(описаниеЧерновика())}</span></button>`;
-    d.querySelector(".main").addEventListener("click", () => {
-      закрытьНедавние();
-      if(восстановитьЧерновик()){ заполнитьПоля(); render(); toast("Заполнение восстановлено"); }
-    });
-    el.appendChild(d);
-  }
   for(const h of список){
     const с = судПоId(h.судId);
     const d = document.createElement("div"); d.className = "rc";
     const кто = экр((h.плательщик || "").split(/\s+/).slice(0, statusWords(h.плательщик)).join(" "));
-    d.innerHTML = `<button type="button" class="main" title="Восстановить всё, дата — сегодня"><b>${кто}${h.ответчик ? " → " + экр(h.ответчик) : ""}</b><span>${экр(с.наименование.replace(" города Москвы", ""))} · ${рубТочно(h.сумма)} · ${датаРус(h.когда).slice(0, 5)} · <u>Повторить</u></span></button>`;
+    const судКратко = экр(с.наименование.replace(" города Москвы", ""));
+    // у сброшенного незаконченного расчёта может не быть ни плательщика, ни суммы
+    const заголовок = кто ? кто + (h.ответчик ? " → " + экр(h.ответчик) : "") : судКратко;
+    const низ = [кто ? судКратко : (h.ответчик ? "к " + экр(h.ответчик) : "заполнение не закончено"),
+                 h.сумма ? рубТочно(h.сумма) : "", датаРус(h.когда).slice(0, 5), "<u>Повторить</u>"].filter(Boolean).join(" · ");
+    d.innerHTML = `<button type="button" class="main" title="Восстановить всё, дата — сегодня"><b>${заголовок}</b><span>${низ}</span></button>`;
     d.querySelector(".main").addEventListener("click", () => { закрытьНедавние(); восстановить(h); });
     el.appendChild(d);
   }
@@ -13195,7 +13219,8 @@ const S = {
   датаРешения:"", дело:"",
   датаРасчёта:сегодняISO(),
   назначение:null, назначениеСброшено:false, ключНазначения:"",
-  контакты:""
+  контакты:"",
+  прошлаяСумма:undefined            // чтобы заметить пересчёт суммы в справке
 };
 // «шаг» в черновике не хранится: он всё равно пересчитывается по данным при открытии
 const ЧЕРНОВИК_ПОЛЯ = ["судId","обращение","требования","льгота","основание","автоЛьгота","автоЛьготаОтклонена","плательщик","статус","соистец","соистецВкл",
@@ -13278,9 +13303,9 @@ function запомнить(ключ, значение, макс){
 }
 const недавние = ключ => ПАМЯТЬ.включена() ? ПАМЯТЬ.json(ключ, []) : [];
 let таймерЧерновика = null;
-/** Записать черновик сейчас же. Пустая форма его не перезаписывает: иначе чистый
- *  старт затирал бы незаконченный расчёт, ради которого черновик и хранится
- *  (решение Ивана 07.09.2026). */
+/** Записать черновик сейчас же. Пустая форма его не перезаписывает: после
+ *  «Сбросить» черновик стирается отдельно, и пустой render не должен его
+ *  воскрешать. */
 function записатьЧерновик(){
   if(!S.судId && !S.требования.length && !S.плательщик.trim()) return;
   const d = {}; for(const k of ЧЕРНОВИК_ПОЛЯ) d[k] = S[k];
@@ -13291,25 +13316,8 @@ function сохранитьЧерновик(){
   clearTimeout(таймерЧерновика);
   таймерЧерновика = setTimeout(записатьЧерновик, 300);
 }
-/** Есть ли что продолжать: черновик считается непустым, если выбран суд,
- *  есть требования или введён плательщик. */
-function естьЧерновик(){
-  const d = ПАМЯТЬ.json("draft", null);
-  if(!d || typeof d !== "object") return false;
-  return !!(d.судId || (Array.isArray(d.требования) && d.требования.length) || (d.плательщик || "").trim());
-}
-/** Короткая подпись черновика для панели «Недавние». */
-function описаниеЧерновика(){
-  const d = ПАМЯТЬ.json("draft", null) || {};
-  const с = d.судId ? судПоId(d.судId) : null;
-  const части = [
-    с ? с.наименование.replace(" города Москвы", "") : "суд не выбран",
-    (d.плательщик || "").trim(),
-  ].filter(Boolean);
-  return части.join(" · ");
-}
-/** Черновик подхватывается только по нажатию в «Недавних» (решение Ивана 07.09.2026):
- *  форма всегда открывается чистой, но случайно закрытую страницу можно вернуть. */
+/** Черновик подхватывается при открытии страницы (решение Ивана 08.09.2026):
+ *  обновление страницы или случайное закрытие браузера ничего не теряет. */
 function восстановитьЧерновик(){
   const d = ПАМЯТЬ.json("draft", null);
   if(!d || typeof d !== "object") return false;
@@ -13797,6 +13805,8 @@ function применитьШаг(){
   $("#stickybar").hidden = S.шаг < 2;
   // на телефоне вводная фраза уходит, как только начали заполнять (см. CSS)
   $("#app").classList.toggle("начали", S.шаг >= 2);
+  // «Сбросить» показывается, только когда есть что сбрасывать
+  $("#reset-btn").hidden = !(S.судId || S.требования.length || S.плательщик.trim());
   рисоватьШаги();
 }
 /** Полоса шагов: пройденные, текущий и будущие. Высота постоянная.
@@ -13822,6 +13832,31 @@ function рисоватьШаги(){
       if(el && !el.hidden) el.scrollIntoView({behavior:"smooth", block:"start"});
     });
   }
+}
+
+/** Начать с чистого листа. Прежний расчёт уходит в «Недавние» — сброс не
+ *  теряет работу (решение Ивана 08.09.2026). */
+function сброситьФорму(){
+  // сохраняем даже незаконченный расчёт: человек нажал «Сбросить», а не «удалить»
+  const сохранили = !!S.судId && ПАМЯТЬ.включена();
+  if(S.судId && typeof записатьИсторию === "function") записатьИсторию(true);
+  S.судId = null; S.субъектФильтр = null; S.обращение = null;
+  S.требования = []; S.льгота = "нет"; S.основание = ""; S.автоЛьгота = null; S.автоЛьготаОтклонена = null;
+  S.плательщик = ""; S.статус = null; S.соистец = ""; S.соистецВкл = false;
+  S.ответчик = ""; S.датаРешения = ""; S.дело = "";
+  S.датаРасчёта = сегодняISO(); S.назначение = null; S.назначениеСброшено = false; S.ключНазначения = "";
+  S.контакты = ""; S.прошлаяСумма = undefined;
+  S.шаг = 1; S.безАнимации = true;
+  clearTimeout(таймерЧерновика);
+  ПАМЯТЬ.убрать("draft");
+  $("#benefits").open = false; delete $("#benefits").dataset.touched;
+  $("#more").open = false;
+  заполнитьПоля();
+  render();
+  if(typeof рисоватьНедавние === "function") рисоватьНедавние();
+  toast(сохранили ? "Форма очищена. Прежний расчёт — в «Недавних»" : "Форма очищена");
+  window.scrollTo({top:0, behavior:"smooth"});
+  $("#court").focus();
 }
 
 /** Поле назначения не тянется мышью — высота подгоняется под текст (Иван 07.09.2026) */
@@ -14000,6 +14035,7 @@ function привязать(){
   }
   $("#btn-pdf").addEventListener("click", () => { if(!готово(неХватает())) return; if(typeof сохранитьPDF === "function") сохранитьPDF(); else { сохранитьВИсторию(); window.print(); } });
   $("#recent-btn").addEventListener("click", () => переключитьНедавние());
+  $("#reset-btn").addEventListener("click", сброситьФорму);
   // Скопировать реквизиты (Иван 07.09.2026): текст для платёжного поручения.
   // navigator.clipboard есть не везде (file:// и старые браузеры) — запасной путь через textarea.
   $("#btn-copy").addEventListener("click", async () => {
@@ -14058,8 +14094,11 @@ function рисоватьПодвал(){
 
 function старт(){
   загрузитьРучныеСуды();
-  // Форма всегда открывается чистой (решение Ивана 07.09.2026). Незаконченный
-  // расчёт и прошлые справки — в панели «Недавние», по нажатию.
+  // Заполненное сохраняется и возвращается при обновлении страницы (решение
+  // Ивана 08.09.2026): это и удобнее, и страховка от случайного закрытия
+  // браузера. Начать с чистого листа — кнопка «Сбросить» рядом с «Недавними»;
+  // сброшенный расчёт уходит в «Недавние», так что ничего не теряется.
+  восстановитьЧерновик();
   выровнятьТребования();
   заполнитьПоля();
   привязать();
