@@ -4,10 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.176 2026-09-08 eccee3d b7401ca88a">
+<meta name="build" content="2.0.177 2026-09-10 3264c71 4690e94fcd">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
+<!-- Скрипты работают: сразу, ещё до разбора страницы, помечаем корневой элемент
+     классом js. По нему CSS прячет баннер «Здесь только предпросмотр» и, пока
+     основной скрипт в конце файла не докачался, показывает «Загрузка…». Раньше
+     баннер снимал сам основной скрипт, и при медленной первой загрузке Chrome
+     успевал нарисовать его и держал секунды (замечание Ивана 10.09.2026). Где
+     скрипты не выполняются (Quick Look на iPhone), этот код не сработает — и
+     баннер будет виден, как и нужно.
+     На load: если основной скрипт так и не запустился (браузер его не разобрал),
+     класс js снимается и баннер появляется снова; если запустился — форма в
+     любом случае перестаёт быть приглушённой. Код намеренно на старом ES5. -->
+<script>
+(function(h){
+  h.className += " js";
+  addEventListener("load", function(){
+    if(!window.gpStarted) h.className = h.className.replace(/(^|\s)js(?=\s|$)/g, "");
+    else if(!/(^|\s)gp-ready(\s|$)/.test(h.className)) h.className += " gp-ready";
+  });
+})(document.documentElement);
+</script>
 
 <style>
 /* ─────────────────────────────────────────────────────────────
@@ -84,6 +103,25 @@ a{color:var(--accent)}
 #nojs{background:#fff7e6;color:#6d4700;border-bottom:1px solid #e6d3a8;padding:12px 16px;font-size:14px;line-height:20px}
 #nojs b{display:block;font-size:16px;margin-bottom:4px}
 #nojs a{color:#6d4700;font-weight:600;word-break:break-all}
+/* Скрипты работают — баннер не нужен ни на миг. Класс js ставит крошечный скрипт
+   в <head> ещё до разбора страницы. Раньше баннер снимал основной скрипт, а он
+   стоит в самом конце файла на 1,2 МБ: при медленной первой загрузке Chrome
+   рисовал баннер и держал его, пока не докачается остальное (замечание Ивана
+   10.09.2026: «висит секунд 5»). В предпросмотре iOS скрипты не выполняются,
+   класса нет — баннер виден, как и должен. */
+.js #nojs{display:none}
+/* Пока основной скрипт не отработал, форма уже видна, но ещё не отвечает. Нажать
+   впустую не даём сразу (набранное всё равно стёрлось бы при старте), а приглушение
+   и «Загрузка…» на месте полосы шагов включаются только через секунду: при средней
+   скорости загрузки скрипт успевает за 0,3-0,7 с, и без задержки форма мигала бы
+   серым (замер проверки 10.09.2026). До секунды ждать без подсказки нормально —
+   порог «поток мысли не прерывается» (Nielsen, 1 с). Скачок, а не плавное
+   затемнение: duration 1 мс. #form и #result, а не .cols: на компьютере у .cols
+   display: contents, прозрачность к нему не применяется. */
+.js:not(.gp-ready) #form,.js:not(.gp-ready) #result{pointer-events:none;animation:загрузка 1ms 1s forwards}
+.js:not(.gp-ready) #steps::before{content:"Загрузка…";color:var(--ink-3);opacity:0;animation:загрузка-надпись 1ms 1s forwards}
+@keyframes загрузка{to{opacity:.5}}
+@keyframes загрузка-надпись{to{opacity:1}}
 
 /* ─── баннер ошибок ─── */
 #errbar{position:sticky;top:0;z-index:100;background:#b91c1c;color:#fff;padding:10px 44px 10px 16px;font-size:14px;line-height:20px}
@@ -284,7 +322,7 @@ textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:none;overflow:h
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.5 7 9.5 11 5.5' fill='none' stroke='%235b6472' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 2px center}
 .money .cur-btn:hover{color:var(--ink);background:var(--accent-soft)}
-.money .cur-box{position:absolute;right:0;top:calc(100% + 4px);z-index:30;width:min(360px,100%);background:var(--card);border:1px solid var(--line);border-radius:var(--r2);box-shadow:0 12px 32px rgba(20,24,29,.16);padding:6px;display:none}
+.money .cur-box{position:absolute;right:0;top:calc(100% + 4px);z-index:50;width:min(360px,100%);background:var(--card);border:1px solid var(--line);border-radius:var(--r2);box-shadow:0 12px 32px rgba(20,24,29,.16);padding:6px;display:none}
 .money .rate{margin-top:var(--s4)}
 .money .cur-box.open{display:block}
 .money .cur-box input{width:100%;height:44px;padding:0 12px;border:1px solid var(--line-2);border-radius:6px;background:var(--field);margin-bottom:6px}
@@ -309,9 +347,13 @@ textarea.inp{height:auto;min-height:76px;padding:0 0 10px;resize:none;overflow:h
 .radios label span{flex:1;min-width:0}
 .radios .q-icon{margin-top:0}
 
-/* combobox (W3C APG: input role=combobox + listbox под полем) */
+/* combobox (W3C APG: input role=combobox + listbox под полем).
+   Слои снизу вверх: липкая панель «К справке» 40 → открытые списки (и выбор
+   валюты) 50 → «Недавние» 60 → всплывающее сообщение 70 → окно «?» 80 → полоса
+   ошибки 100. Список всегда выше панели: раньше панель закрывала «Вид обращения»
+   и выбор валюты (замечание Ивана 10.09.2026). */
 .cb{position:relative}
-.cb .box{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);
+.cb .box{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:50;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);
   box-shadow:0 12px 32px rgba(20,24,29,.16);max-height:min(400px,60vh);overflow:auto;display:none;padding:6px}
 .cb .box.open{display:block}
 .cb .box.up{top:auto;bottom:calc(100% + 4px)}
@@ -527,6 +569,10 @@ details.more>div{padding-top:var(--s3)}
   .result .actions{flex:none}
   .sheet{flex:0 0 auto;min-height:0;overflow:visible;padding:28px}
   .stickybar{display:none}
+  /* Список «Вид требования» шире своего поля (440 px): у правого поля пары он уходил на
+     92 px в колонку справки. Теперь он раскрывается влево, над соседним полем, и не
+     залезает на лист (проверка 10.09.2026). */
+  .claim-two > .fld.cb:last-child > .box{left:auto;right:0}
 }
 
 /* ─── низкое окно: справка уплотняется, чтобы влезть целиком ───
@@ -598,7 +644,13 @@ details.more>div{padding-top:var(--s3)}
    Появление блока — прозрачность и сдвиг 6 px за 200 мс по кривой
    «emphasized decelerate» из Material 3. Соседние блоки при этом не двигаются:
    двигается только тот, что появился. */
-.step-in{animation:шаг var(--dur) var(--ease-out) both}
+/* Заливка backwards, а не both (10.09.2026). При both Chrome после анимации держит
+   transform: matrix(1, 0, 0, 1, 0, 0) — единичный, но не none, — и блок навсегда
+   становится отдельным слоем. Открытый список такого блока рисовался ПОД следующими
+   блоками формы: в Chrome с живыми часами из 32 точек списка «Вид обращения» не было
+   видно ни одной. backwards держит начальный кадр только до старта, после конца
+   анимации от неё ничего не остаётся — и на глаз всё то же самое. */
+.step-in{animation:шаг var(--dur) var(--ease-out) backwards}
 @keyframes шаг{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
 /* ─── заготовка справки ───────────────────────────────────────────
@@ -634,9 +686,12 @@ details.more>div{padding-top:var(--s3)}
 </style>
 </head>
 <body>
-<!-- Статичный баннер: виден только там, где скрипты не выполняются
-     (предпросмотр на iPhone из Файлов / Telegram / Почты). Скрипт удаляет его
-     первой строкой. <noscript> в предпросмотре iOS не показывается. -->
+<!-- Статичный баннер: виден только там, где скрипты не выполняются, — в
+     предпросмотре iOS (Quick Look): файл .html из «Файлов», из Почты или
+     присланный в Telegram документом. Ссылка из Telegram открывается во
+     встроенном браузере Telegram — там всё работает и баннера нет. В браузере со
+     скриптами баннер скрыт с самого начала (класс js из <head>), а основной
+     скрипт его удаляет. <noscript> в предпросмотре iOS не показывается. -->
 <div id="nojs">
   <b>Здесь только предпросмотр — кнопки не работают.</b>
   Откройте калькулятор по ссылке в браузере: <a href="https://vanyabalyan1-cloud.github.io/gosposhlina/">https://vanyabalyan1-cloud.github.io/gosposhlina/</a>.
@@ -805,14 +860,20 @@ details.more>div{padding-top:var(--s3)}
 /* ═══ 10_env.js ═══ */
 /* ═════════════════════════════════════════════════════════════════════
    БЛОК 0. ОКРУЖЕНИЕ
-   Первым делом — убрать статичный баннер «Откройте по ссылке»: он нужен
-   только там, где скрипты не выполняются (предпросмотр iOS в Файлах,
-   Telegram, Почте — <noscript> там не показывается, проверено 05.09.2026).
+   Первым делом — отметить, что основной скрипт запустился (флаг читает
+   скрипт в <head>, см. 00_head.html), и убрать статичный баннер «Здесь только
+   предпросмотр». Баннер нужен только там, где скрипты не выполняются: это
+   предпросмотр iOS (Quick Look) — файл .html из «Файлов», из Почты или
+   присланный в Telegram документом; <noscript> там не показывается (проверено
+   05.09.2026). Ссылка, открытая в Telegram, идёт во встроенный браузер
+   Telegram — это полноценный WKWebView, там всё работает (сверено по исходникам
+   Telegram-iOS 10.09.2026). Спрятан баннер ещё раньше — классом js из <head>.
    ═══════════════════════════════════════════════════════════════════ */
+window.gpStarted = true;
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.176", дата:"2026-09-08", коммит:"eccee3d", сумма:"b7401ca88a"};
+const СБОРКА = {версия:"2.0.177", дата:"2026-09-10", коммит:"3264c71", сумма:"4690e94fcd"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -948,7 +1009,11 @@ const ПАМЯТЬ = {
   дать(k){ try{ return localStorage.getItem(this.ключ(k)); }catch(e){ return null; } },
   положить(k, v){ try{ localStorage.setItem(this.ключ(k), v); }catch(e){} },
   убрать(k){ try{ localStorage.removeItem(this.ключ(k)); }catch(e){} },
-  json(k, по){ try{ const v = this.дать(k); return v ? JSON.parse(v) : по; }catch(e){ return по; } }
+  json(k, по){ try{ const v = this.дать(k); return v ? JSON.parse(v) : по; }catch(e){ return по; } },
+  /** Список из памяти. Если там не массив (запись испорчена или осталась от старой
+   *  версии) — пустой: страница читает память при каждом открытии и падать из-за неё
+   *  не должна (найдено проверкой 10.09.2026). */
+  список(k){ const v = this.json(k, []); return Array.isArray(v) ? v : []; }
 };
 
 /* ═══ 20_law.js ═══ */
@@ -1652,6 +1717,7 @@ function фамилияВПадеже(w, падеж, пол){
   const l = w.toLowerCase(), e = n => l.slice(-n), род = падеж === "род";
   if(/[оеиуэюы]$/.test(l) && !/[ая]$/.test(l)) return w;                 // Шевченко, Дурново, Гарсиа? — несклоняемые
   if(e(2) === "их" || e(2) === "ых") return w;                             // Черных
+  if(e(2) === "ия") return w.slice(0,-1) + "и";                             // Берия → Берии и в родительном, и в дательном (было «Берие»)
   if(пол === "ж"){
     if(/(ова|ева|ёва|ина|ына)$/.test(l)) return w.slice(0,-1) + "ой";     // Иванова → Ивановой
     if(e(2) === "ая" || e(2) === "яя") return w.slice(0,-2) + "ой";        // Толстая → Толстой
@@ -1674,6 +1740,12 @@ function фиоВПадеже(полное, падеж){
   if(ст === "юр") return t;
   if(ст === "ип"){
     const без = t.replace(/^ип\s+/iu, "").replace(/^индивидуальн[а-яё]+\s+предпринимател[а-яё]*\s+/iu, "");
+    // Отрезать нечего: одно «ИП», пока фамилия ещё не набрана, или слова
+    // «индивидуальный предприниматель» не в начале строки. Склонять тут нечего,
+    // текст остаётся как набран. Без этой проверки функция вызывала сама себя
+    // бесконечно — красная полоса «Maximum call stack size exceeded» (Иван 10.09.2026).
+    // С ней каждый вызов короче предыдущего, поэтому рекурсия всегда кончается.
+    if(без === t) return t;
     return "ИП " + фиоВПадеже(без, падеж);
   }
   const части = t.split(/\s+/);
@@ -1739,7 +1811,9 @@ function сложить(начало, части, конец){
 
 /* ——— строка QR по ГОСТ Р 56042-2014 ——— */
 function собратьPayload({суд, кбк, сумма, назначение, фио, статус, кодировка}){
-  const clean = v => String(v == null ? "" : v).replace(/\|/g, " ").trim();
+  // «|» — разделитель полей, а переносы и табуляция ломают строку для банка: всё это
+  // становится одним пробелом (переносы из поля назначения доходили до QR — 10.09.2026)
+  const clean = v => String(v == null ? "" : v).replace(/\|/g, " ").replace(/\s+/g, " ").trim();
   const поля = [
     `Name=${clean(ФНС.получатель)}`,
     `PersonalAcc=${clean(ФНС.счёт)}`,
@@ -12082,15 +12156,16 @@ const ПОРЯДКОВЫЕ = {"первый":"1","второй":"2","трети�
 
 const ГОРОДА_СОКР = [["санкт-петербург", ["спб", "питер"]], ["москв", ["мск"]], ["екатеринбург", ["екб"]], ["новосибирск", ["нск"]],
   ["нижегородск", ["нн"]], ["нижний новгород", ["нн"]], ["ростов-на-дону", ["рнд"]], ["владивосток", ["влк"]], ["челябинск", ["чел"]]];
+// адрес может прийти из памяти устройства (суд, добавленный вручную) — там бывает что угодно
 function сайтПолный(s){
-  if(!s) return "";
+  if(typeof s !== "string" || !s) return "";
   if(s.startsWith("s:")) return "http://" + s.slice(2) + ".sudrf.ru";
   if(s.startsWith("m:")) return "https://mos-gorsud.ru/" + s.slice(2);
   if(s.startsWith("a:")) return "https://" + s.slice(2) + ".arbitr.ru";
   return s;
 }
 function страницаПошлины(s){
-  if(!s) return "";
+  if(typeof s !== "string" || !s) return "";
   if(s.startsWith("s:")) return сайтПолный(s) + "/modules.php?name=govduty";
   if(s.startsWith("m:")) return сайтПолный(s) + "/services/gosudarstvennaya-poshlina";
   if(s.startsWith("a:")) return сайтПолный(s) + "/process/duty/commission";
@@ -12865,6 +12940,16 @@ async function сохранитьPDF(){
 }
 
 /* ——— история на устройстве ——— */
+/** «Недавние» из памяти устройства. Испорченная или старая запись не должна ронять
+ *  страницу при каждом открытии: берём только записи с судом, поля приводим к своему
+ *  виду (найдено проверкой 10.09.2026). */
+function история(){
+  const стр = v => typeof v === "string" ? v : "";
+  return ПАМЯТЬ.список("history").filter(h => h && typeof h === "object" && typeof h.судId === "string").map(h => ({
+    когда:стр(h.когда), судId:h.судId, обращение:стр(h.обращение) || null, требования:чистыеТребования(h.требования),
+    льгота:стр(h.льгота) || "нет", основание:стр(h.основание), плательщик:стр(h.плательщик), статус:известныйСтатус(h.статус),
+    соистец:стр(h.соистец), ответчик:стр(h.ответчик), сумма:Number(h.сумма) || 0}));
+}
 /** @param принудительно — записать даже незаконченный расчёт (нажали «Сбросить»:
  *  человек начинает заново, но потерять начатое не должен, Иван 08.09.2026). */
 function записатьИсторию(принудительно){
@@ -12876,7 +12961,7 @@ function записатьИсторию(принудительно){
                   льгота:S.льгота, основание:S.основание, плательщик:S.плательщик, статус:S.статус, соистец:S.соистецВкл ? S.соистец : "",
                   ответчик:S.ответчик, сумма:к.итог};
   const ключ = JSON.stringify([запись.судId, запись.требования, запись.плательщик, запись.ответчик]);
-  const список = ПАМЯТЬ.json("history", []).filter(x => JSON.stringify([x.судId, x.требования, x.плательщик, x.ответчик]) !== ключ);
+  const список = история().filter(x => JSON.stringify([x.судId, x.требования, x.плательщик, x.ответчик]) !== ключ);
   список.unshift(запись);
   ПАМЯТЬ.положить("history", JSON.stringify(список.slice(0, 8)));
   рисоватьНедавние();
@@ -12886,7 +12971,7 @@ function записатьИсторию(принудительно){
  *  её видно только по щелчку, там же «Очистить». */
 function рисоватьНедавние(){
   const el = $("#recent"), обёртка = $("#recent-wrap"); if(!el || !обёртка) return;
-  const список = (ПАМЯТЬ.включена() ? ПАМЯТЬ.json("history", []) : []).filter(h => судПоId(h.судId));
+  const список = (ПАМЯТЬ.включена() ? история() : []).filter(h => судПоId(h.судId));
   // Строки «Продолжить заполнение» больше нет: с 08.09.2026 форма сама
   // открывается там, где её оставили, а начать заново — кнопка «Сбросить».
   обёртка.hidden = !список.length;
@@ -12928,7 +13013,7 @@ function переключитьНедавние(){
 function statusWords(имя){ return статусПоИмени(имя) === "юр" ? 2 : 1; }
 function восстановить(h){
   S.судId = h.судId; S.обращение = h.обращение || "иск";
-  S.требования = (h.требования || []).map(в => ({id:в.id, цена:в.цена || 0, валюта:в.валюта || "RUB", курс:в.курс || 0, суть:в.суть || "", сутьПравлена:!!в.сутьПравлена}));
+  S.требования = чистыеТребования(h.требования);
   S.льгота = h.льгота || "нет"; S.основание = h.основание || ""; S.автоЛьгота = null;
   S.плательщик = h.плательщик || ""; S.статус = h.статус || null; S.соистец = h.соистец || ""; S.соистецВкл = !!h.соистец;
   S.ответчик = h.ответчик || "";
@@ -13077,7 +13162,19 @@ const ТЕСТЫ_ФИО = [
   ["Толстая С.А.", "род", "Толстой С.А."],
   ["Иванова", "род", "Ивановой"],
   ["Глинка М.И.", "род", "Глинки М.И."],
+  // фамилия на -ия: в дательном «Берии», а не «Берие» (проверка 10.09.2026)
+  ["Берия Лаврентий Павлович", "дат", "Берии Л.П."],
+  ["Берия Лаврентий Павлович", "род", "Берии Л.П."],
   ["ИП Сидоров Пётр Петрович", "род", "ИП Сидорова П.П."],
+  ["Индивидуальный предприниматель Сидоров П.П.", "дат", "ИП Сидорову П.П."],
+  // Пока человек набирает «ИП Петров…», в поле на миг стоит одно «ИП». До 10.09.2026
+  // склонение на нём уходило в бесконечную рекурсию — красная полоса
+  // «Maximum call stack size exceeded» (замечание Ивана). Склонять тут нечего:
+  // текст возвращается как набран.
+  ["ИП", "дат", "ИП"],
+  ["ИП ", "род", "ИП"],
+  ["Индивидуальный предприниматель", "дат", "Индивидуальный предприниматель"],
+  ["Петров Пётр Петрович, индивидуальный предприниматель", "дат", "Петров Пётр Петрович, индивидуальный предприниматель"],
   ["ООО «Ромашка»", "род", "ООО «Ромашка»"]
 ];
 const ТЕСТЫ_СТАТУС = [
@@ -13110,7 +13207,8 @@ function runSelfTest(){
   out.push("\nСУД В ТВОРИТЕЛЬНОМ ПАДЕЖЕ");
   for(const [им, тв] of ТЕСТЫ_СУД_ТВ){ const got = судВТворительном(им); out.push(`  ${знак(got === тв)} ${им} → ${got}`); }
   out.push("\nФИО В ПАДЕЖЕ");
-  for(const [им, п, ждём] of ТЕСТЫ_ФИО){ const got = фиоВПадеже(им, п); out.push(`  ${знак(got === ждём)} ${им} (${п}) → ${got}`); }
+  // ошибка в одном случае не должна обрывать всю самопроверку — она становится строкой ✗
+  for(const [им, п, ждём] of ТЕСТЫ_ФИО){ let got; try{ got = фиоВПадеже(им, п); }catch(e){ got = "ошибка: " + e.message; } out.push(`  ${знак(got === ждём)} ${им} (${п}) → ${got}`); }
   out.push("\nСТАТУС ПЛАТЕЛЬЩИКА ПО ИМЕНИ");
   for(const [им, ждём] of ТЕСТЫ_СТАТУС){ const got = статусПоИмени(им); out.push(`  ${знак(got === ждём)} ${им} → ${got}`); }
   out.push("\nРАЗБОР СУММЫ");
@@ -13150,7 +13248,10 @@ function runSelfTest(){
     ["ОКТМО суда на месте", payload.includes("|OKTMO=46755000|")],
     ["КБК при подаче, не «по судебным актам»", payload.includes("|CBC=18210803010011050110|")],
     ["ФИО плательщика разложено", payload.includes("|LastName=Иванов|FirstName=Иван|MiddleName=Иванович")],
-    ["у организации ФИО не кладётся", !собратьPayload({суд, кбк:"1", сумма:1, назначение:"x", фио:"ООО Ромашка", статус:"юр"}).includes("LastName")]
+    ["у организации ФИО не кладётся", !собратьPayload({суд, кбк:"1", сумма:1, назначение:"x", фио:"ООО Ромашка", статус:"юр"}).includes("LastName")],
+    // переносы и табуляция из поля назначения не уходят в QR (проверка 10.09.2026)
+    ["переносы и табуляция в назначении стали пробелами", (p => !/[\r\n\t]/.test(p) && p.includes("|Purpose=Госпошлина за иск x|"))(
+      собратьPayload({суд, кбк:"1", сумма:1, назначение:"Госпошлина\nза\t иск |x", фио:"Иванов Иван", статус:"физ"}))]
   ];
   for(const [имя, res] of проверки) out.push(`  ${знак(res)} ${имя}`);
   const {bytes, lost} = toCp1251(payload);
@@ -13223,8 +13324,12 @@ const S = {
   прошлаяСумма:undefined            // чтобы заметить пересчёт суммы в справке
 };
 // «шаг» в черновике не хранится: он всё равно пересчитывается по данным при открытии
-const ЧЕРНОВИК_ПОЛЯ = ["судId","обращение","требования","льгота","основание","автоЛьгота","автоЛьготаОтклонена","плательщик","статус","соистец","соистецВкл",
-  "ответчик","датаРешения","дело","датаРасчёта","назначение","контакты"];
+// Рядом с каждым полем — какого оно вида: при восстановлении берём только значения
+// своего вида (см. восстановитьЧерновик). «строка?» — строка или пусто (null).
+const ВИД_ПОЛЕЙ_ЧЕРНОВИКА = {судId:"строка?", обращение:"строка?", требования:"список", льгота:"строка", основание:"строка",
+  автоЛьгота:"строка?", автоЛьготаОтклонена:"строка?", плательщик:"строка", статус:"строка?", соистец:"строка", соистецВкл:"флажок",
+  ответчик:"строка", датаРешения:"строка", дело:"строка", датаРасчёта:"строка", назначение:"строка?", контакты:"строка"};
+const ЧЕРНОВИК_ПОЛЯ = Object.keys(ВИД_ПОЛЕЙ_ЧЕРНОВИКА);
 
 const ОСНОВАНИЯ_КРАТКО = {
   зарплата:"Зарплата, трудовой спор", алименты:"Алименты", здоровье:"Вред здоровью", преступление:"Вред от преступления",
@@ -13281,7 +13386,8 @@ function собратьНазначениеИзСостояния(){
   return собратьНазначение({суд:с, шаблон:шаблонНазначения(), документ:документ(), дата:S.датаРасчёта,
     истец:истецТекст(), ответчик:ответчикПосле_к(S.ответчик), суть:суть(), датаРешения:S.датаРешения, дело:S.дело});
 }
-function назначение(){ return S.назначение != null ? S.назначение : собратьНазначениеИзСостояния(); }
+// правка назначения из черновика прежней версии могла сохранить перенос строки — показываем пробелом
+function назначение(){ return S.назначение != null ? S.назначение.replace(/[\r\n\t]/g, " ") : собратьНазначениеИзСостояния(); }
 function расчёт(){ return рассчитать({ветка:ветка(), лицо:статус(), выбраны:выбранныеТр(), льгота:S.льгота, основание:S.основание}); }
 function неХватает(){
   // «сумма» проверяется по введённой цене (в любой валюте), «курс» — только у требований с ценой
@@ -13297,11 +13403,11 @@ const ПОЛЯ_НЕХВАТКИ = {суд:"#court", требование:"#appea
 /* ——— память устройства ——— */
 function запомнить(ключ, значение, макс){
   if(!ПАМЯТЬ.включена() || !значение) return;
-  const список = ПАМЯТЬ.json(ключ, []).filter(x => x !== значение);
+  const список = ПАМЯТЬ.список(ключ).filter(x => typeof x === "string" && x !== значение);
   список.unshift(значение);
   ПАМЯТЬ.положить(ключ, JSON.stringify(список.slice(0, макс || 6)));
 }
-const недавние = ключ => ПАМЯТЬ.включена() ? ПАМЯТЬ.json(ключ, []) : [];
+const недавние = ключ => ПАМЯТЬ.включена() ? ПАМЯТЬ.список(ключ).filter(x => typeof x === "string") : [];
 let таймерЧерновика = null;
 /** Записать черновик сейчас же. Пустая форма его не перезаписывает: после
  *  «Сбросить» черновик стирается отдельно, и пустой render не должен его
@@ -13316,14 +13422,29 @@ function сохранитьЧерновик(){
   clearTimeout(таймерЧерновика);
   таймерЧерновика = setTimeout(записатьЧерновик, 300);
 }
+/** Требования из памяти (черновик или «Недавние»): только известные каталогу, числа —
+ *  числами, строки — строками. Запись могла испортиться или остаться от старой версии. */
+function чистыеТребования(список){
+  return (Array.isArray(список) ? список : []).filter(в => в && typeof в === "object" && требованиеПоId(в.id)).map(в => ({id:в.id,
+    цена:Number(в.цена) > 0 ? Number(в.цена) : 0, валюта:typeof в.валюта === "string" && в.валюта ? в.валюта : "RUB",
+    курс:Number(в.курс) > 0 ? Number(в.курс) : 0, суть:typeof в.суть === "string" ? в.суть : "", сутьПравлена:!!в.сутьПравлена}));
+}
+/** Статус плательщика из памяти — только из известных, иначе пусто. */
+const известныйСтатус = v => typeof v === "string" && Object.prototype.hasOwnProperty.call(СТАТУС_НАЗВ, v) ? v : null;
 /** Черновик подхватывается при открытии страницы (решение Ивана 08.09.2026):
  *  обновление страницы или случайное закрытие браузера ничего не теряет. */
 function восстановитьЧерновик(){
   const d = ПАМЯТЬ.json("draft", null);
-  if(!d || typeof d !== "object") return false;
-  for(const k of ЧЕРНОВИК_ПОЛЯ) if(k in d) S[k] = d[k];
-  if(!Array.isArray(S.требования)) S.требования = [];
-  S.требования = S.требования.filter(в => в && требованиеПоId(в.id)).map(в => ({id:в.id, цена:в.цена || 0, валюта:в.валюта || "RUB", курс:в.курс || 0, суть:в.суть || "", сутьПравлена:!!в.сутьПравлена}));
+  if(!d || typeof d !== "object" || Array.isArray(d)) return false;
+  // Черновик открывается сам при каждой загрузке, поэтому испорченный (или оставшийся
+  // от старой версии) не должен ронять страницу раз за разом: одно число вместо строки
+  // в «Плательщике» давало ошибку при каждом открытии (найдено проверкой 10.09.2026).
+  // Значение чужого вида просто не берём.
+  const годится = (вид, v) => вид === "список" ? Array.isArray(v) : вид === "флажок" ? typeof v === "boolean"
+    : typeof v === "string" || (вид === "строка?" && v === null);
+  for(const k of ЧЕРНОВИК_ПОЛЯ) if(k in d && годится(ВИД_ПОЛЕЙ_ЧЕРНОВИКА[k], d[k])) S[k] = d[k];
+  S.требования = чистыеТребования(S.требования);
+  S.статус = известныйСтатус(S.статус);
   if(S.судId && !судПоId(S.судId)) S.судId = null;
   // дата из черновика не может быть в прошлом: срок оплаты и «от …» в назначении должны быть актуальными
   if(!/^\d{4}-\d{2}-\d{2}$/.test(S.датаРасчёта || "") || S.датаРасчёта < сегодняISO()) S.датаРасчёта = сегодняISO();
@@ -13333,10 +13454,11 @@ function восстановитьЧерновик(){
 
 /* ——— суды, добавленные вручную ——— */
 function загрузитьРучныеСуды(){
-  for(const з of ПАМЯТЬ.json("custom_courts", [])){
-    if(СУДЫ_ПО_ID.has(з[0])) continue;
-    const с = развернутьСуд(з); с.ручной = true;
-    СУДЫ.push(с); СУДЫ_ПО_ID.set(с.id, с);
+  // испорченная запись в памяти не должна ронять страницу при каждом открытии
+  for(const з of ПАМЯТЬ.список("custom_courts")){
+    if(!Array.isArray(з) || typeof з[0] !== "string" || typeof з[1] !== "string" || СУДЫ_ПО_ID.has(з[0])) continue;
+    try{ const с = развернутьСуд(з); с.ручной = true; СУДЫ.push(с); СУДЫ_ПО_ID.set(с.id, с); }
+    catch(e){ /* запись не разобралась — пропускаем её, а не всю страницу */ }
   }
 }
 function добавитьРучнойСуд(наименование, октмо, тип){
@@ -13344,9 +13466,35 @@ function добавитьРучнойСуд(наименование, октмо
   const з = [id, наименование.trim(), "00", "", октмо.trim(), "", 0, тип, сегодняISO()];
   const с = развернутьСуд(з); с.ручной = true;
   СУДЫ.push(с); СУДЫ_ПО_ID.set(id, с);
-  const все = ПАМЯТЬ.json("custom_courts", []); все.push(з); ПАМЯТЬ.положить("custom_courts", JSON.stringify(все));
+  const все = ПАМЯТЬ.список("custom_courts"); все.push(з); ПАМЯТЬ.положить("custom_courts", JSON.stringify(все));
   return с;
 }
+
+/** Блок формы, который только что появился, доигрывает анимацию сразу. Пока она идёт
+ *  (200 мс), блок — отдельный слой, и открытый в нём список лёг бы под панель «К справке»
+ *  и под соседние блоки (проверка 10.09.2026). */
+function доигратьПоявление(el){ const блок = el.closest(".step-in"); if(блок && блок.getAnimations) блок.getAnimations().forEach(a => a.finish()); }
+/** Список открывается туда, где больше места, и не выходит за край видимой части экрана
+ *  (на телефоне с открытой клавиатурой — это часть над ней). Прежнее правило мерило одно
+ *  поле без подписи и подсказки и брало 340 px при списках до 400: список обрезался краем
+ *  экрана, даже когда с другой стороны места хватало, а страница подпрыгивала, когда
+ *  выбранная строка прокручивалась в поле зрения (проверка 10.09.2026). */
+function разместитьСписок(bx){
+  const якорь = (bx.offsetParent || bx.parentElement).getBoundingClientRect(), vv = window.visualViewport;
+  const верх = vv ? vv.offsetTop : 0, низ = vv ? vv.offsetTop + vv.height : window.innerHeight;
+  const снизу = низ - якорь.bottom - 8, сверху = якорь.top - верх - 8;
+  bx.classList.remove("up"); bx.style.maxHeight = "";
+  const нужно = bx.offsetHeight;                       // своя высота, не больше min(400px, 60vh) из CSS
+  const вверх = нужно > снизу && сверху > снизу;
+  bx.classList.toggle("up", вверх);
+  bx.style.maxHeight = Math.max(144, Math.min(нужно, вверх ? сверху : снизу)) + "px";
+  // поправка на рамку и внутренние отступы списка: край не должен уйти за экран, иначе
+  // прокрутка к выбранной строке сдвинет страницу (на 360×640 было 5 px)
+  const r = bx.getBoundingClientRect(), лишнее = Math.max(0, верх - r.top, r.bottom - низ);
+  if(лишнее) bx.style.maxHeight = Math.max(144, parseFloat(bx.style.maxHeight) - лишнее) + "px";
+}
+// клавиатура телефона открылась или закрылась — открытый список пересчитывает своё место
+if(window.visualViewport) window.visualViewport.addEventListener("resize", () => { const b = document.querySelector(".cb .box.open"); if(b) разместитьСписок(b); });
 
 /* ═══ COMBOBOX — единый компонент (input role=combobox + listbox) ═══ */
 function combobox({input, box, items, render, onPick, onType, emptyRow}){
@@ -13360,7 +13508,11 @@ function combobox({input, box, items, render, onPick, onType, emptyRow}){
   const isOpen = () => bx.classList.contains("open");
   function close(){ bx.classList.remove("open"); inp.setAttribute("aria-expanded", "false"); inp.removeAttribute("aria-activedescendant"); act = -1; }
   function paint(){ [...bx.querySelectorAll(".opt[role=option]")].forEach((el, i) => { el.classList.toggle("act", i === act); el.setAttribute("aria-selected", i === act);
-    if(i === act){ inp.setAttribute("aria-activedescendant", el.id); el.scrollIntoView({block:"nearest"}); } }); }
+    if(i === act){ inp.setAttribute("aria-activedescendant", el.id);
+      // Прокручиваем только сам список. scrollIntoView двигал и страницу — с учётом её
+      // scroll-padding, поэтому строка у верхнего края давала «прыжок» при открытии.
+      const верх = el.offsetTop, низ = верх + el.offsetHeight;
+      if(верх < bx.scrollTop) bx.scrollTop = верх; else if(низ > bx.scrollTop + bx.clientHeight) bx.scrollTop = низ - bx.clientHeight; } }); }
   function open(){
     const q = inp.readOnly ? "" : inp.value; const all = items(q); bx.innerHTML = "";
     if(!all.length){ if(!emptyRow) return close(); const d = document.createElement("div"); d.className = "opt none"; d.innerHTML = emptyRow(q); bx.appendChild(d);
@@ -13374,8 +13526,10 @@ function combobox({input, box, items, render, onPick, onType, emptyRow}){
     }
     act = list.findIndex(x => x.выбран);
     if(act < 0) act = (list.length && (inp.readOnly || !inp.value.trim())) ? 0 : -1;
-    const r = inp.getBoundingClientRect(); bx.classList.toggle("up", r.bottom + 340 > window.innerHeight && r.top > 360);
-    bx.classList.add("open"); inp.setAttribute("aria-expanded", "true"); paint();
+    доигратьПоявление(bx);
+    bx.classList.add("open"); inp.setAttribute("aria-expanded", "true");
+    разместитьСписок(bx);                                  // сначала место, потом прокрутка к выбранной строке
+    paint();
   }
   function pick(i){ const it = list[i]; if(!it) return; const keep = onPick(it); if(!keep) close(); else open(); }
   inp.addEventListener("focus", () => { навигация = false; open(); });
@@ -13716,7 +13870,7 @@ function рисоватьЦены(к, нх){
       const btn = d.querySelector(".cur-btn"), cb = d.querySelector(".cur-box"), поиск = cb.querySelector("input"), list = cb.querySelector(".list");
       const рисоватьВалюты = () => { const q = норм(поиск.value); list.innerHTML = ВАЛЮТЫ.filter(v => !q || норм(v[0] + " " + v[1] + " " + v[2]).includes(q)).slice(0, 60)
         .map(v => `<div class="opt${v[0] === (в.исх.валюта || "RUB") ? " act" : ""}" data-code="${v[0]}"><span class="code">${v[0]}</span><span>${экр(v[1])}</span><span class="sym">${экр(v[2])}</span></div>`).join(""); };
-      btn.addEventListener("click", e => { e.stopPropagation(); const open = cb.classList.toggle("open"); if(open){ поиск.value = ""; рисоватьВалюты(); поиск.focus(); } });
+      btn.addEventListener("click", e => { e.stopPropagation(); доигратьПоявление(cb); const open = cb.classList.toggle("open"); if(open){ поиск.value = ""; рисоватьВалюты(); поиск.focus(); } });
       поиск.addEventListener("input", рисоватьВалюты);
       поиск.addEventListener("keydown", e => { if(e.key === "Escape") cb.classList.remove("open"); if(e.key === "Enter"){ const f = list.querySelector(".opt"); if(f) f.dispatchEvent(new MouseEvent("mousedown", {bubbles:true})); } });
       list.addEventListener("mousedown", e => { const o = e.target.closest(".opt"); if(!o) return; e.preventDefault(); const з = S.требования.find(x => x.id === в.тр.id);
@@ -14020,7 +14174,16 @@ function привязать(){
   $("#contacts").addEventListener("input", e => { S.контакты = e.target.value; render(); });
   $("#benefits").addEventListener("toggle", () => { $("#benefits").dataset.touched = "1"; });
   // назначение — правится сразу; пустое поле возвращает автосборку
-  $("#purpose").addEventListener("input", e => { const v = e.target.value; подогнатьВысоту(e.target); S.назначение = v.trim() && v !== собратьНазначениеИзСостояния() ? v : null; S.назначениеСброшено = false; render(); });
+  // Назначение платежа — одна строка: в платёжном поручении и в QR переносов нет.
+  // Enter не вставляет перенос, а переносы и табуляция из буфера становятся пробелами
+  // (раньше они уходили прямо в QR — проверка 10.09.2026). Замена знак в знак,
+  // поэтому курсор остаётся на месте.
+  $("#purpose").addEventListener("keydown", e => { if(e.key === "Enter" && !e.isComposing) e.preventDefault(); });
+  $("#purpose").addEventListener("input", e => {
+    const ta = e.target;
+    if(/[\r\n\t]/.test(ta.value)){ const к = ta.selectionStart; ta.value = ta.value.replace(/[\r\n\t]/g, " "); ta.setSelectionRange(к, к); }
+    const v = ta.value; подогнатьВысоту(ta); S.назначение = v.trim() && v !== собратьНазначениеИзСостояния() ? v : null; S.назначениеСброшено = false; render();
+  });
   $("#purpose").addEventListener("blur", () => render());
   // выдача
   // кнопки серые (без disabled — иначе не показывается подсказка на обёртке), поэтому готовность проверяем и здесь
@@ -14093,21 +14256,27 @@ function рисоватьПодвал(){
 }
 
 function старт(){
-  загрузитьРучныеСуды();
-  // Заполненное сохраняется и возвращается при обновлении страницы (решение
-  // Ивана 08.09.2026): это и удобнее, и страховка от случайного закрытия
-  // браузера. Начать с чистого листа — кнопка «Сбросить» рядом с «Недавними»;
-  // сброшенный расчёт уходит в «Недавние», так что ничего не теряется.
-  восстановитьЧерновик();
-  выровнятьТребования();
-  заполнитьПоля();
-  привязать();
-  if(typeof рисоватьНедавние === "function") рисоватьНедавние();
-  render();
-  рисоватьПодвал();
+  try{
+    загрузитьРучныеСуды();
+    // Заполненное сохраняется и возвращается при обновлении страницы (решение
+    // Ивана 08.09.2026): это и удобнее, и страховка от случайного закрытия
+    // браузера. Начать с чистого листа — кнопка «Сбросить» рядом с «Недавними»;
+    // сброшенный расчёт уходит в «Недавние», так что ничего не теряется.
+    восстановитьЧерновик();
+    выровнятьТребования();
+    заполнитьПоля();
+    привязать();
+    if(typeof рисоватьНедавние === "function") рисоватьНедавние();
+    render();
+    рисоватьПодвал();
 
-  if(/selftest/.test(location.search + location.hash)) показатьСамопроверку();
-  if(/throwtest/.test(location.search)) setTimeout(() => { throw new Error("проверочная ошибка"); }, 0);
+    if(/selftest/.test(location.search + location.hash)) показатьСамопроверку();
+    if(/throwtest/.test(location.search)) setTimeout(() => { throw new Error("проверочная ошибка"); }, 0);
+  } finally {
+    // Форма отвечает — снимаем «Загрузка…» и приглушение (01_style.css). В finally:
+    // даже если старт споткнулся, форма не должна остаться серой навсегда.
+    document.documentElement.classList.add("gp-ready");
+  }
 }
 
 window.__гп = {S, render, рассчитать, расчёт, поШкале, собратьНазначение, назначение, собратьPayload, вРодительном, судВТворительном, фиоВПадеже,
