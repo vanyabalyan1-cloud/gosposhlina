@@ -4,10 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.196 2026-09-11 98e26ed f006d0eda1">
+<meta name="build" content="2.0.199 2026-09-12 bb8c854 eee8a48f70">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
+<!-- Иконка вкладки (12.09.2026), встроена data: URI — файл один и работает без сети.
+     Исходники src/icon.svg (вкладка) и src/icon-touch.svg (экран «Домой»); PNG из них делает
+     tools/make_icons.py, build.py подставляет метки и сверяет, что PNG не отстали от SVG.
+     SVG с sizes="any" Chrome берёт при любом порядке тегов (оценка 1,0 против 0,58 у PNG 32 —
+     проверено в настоящей вкладке Chrome 152); type нужен Firefox: у data: нет расширения.
+     PNG 32 — для браузеров без SVG-иконок. Значок 180 без прозрачности: iOS скругляет сам.
+     Safari до 26 data:-иконки не берёт вовсе — там останется значок по умолчанию. -->
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAATnRFWHRncC1zdmctc2hhMjU2ADc2ZDk1NmUxMmM5NTk5ZTljMzIxNTJkMTNmMzM5NmUxOTk0OTlhNTU5NGJiYmRiNDkwY2M4Y2E3N2JkMmRkY2IENrCYAAAByElEQVR42u1XTShEURT+zp33IhOGhRgKZUMpinq2NhiULOz8JGslY2FlaWFK2MpC2bBAZCYlKzUL8hYsZEJkzMhkYgjjvWM1shgZzLyHfKvbvad7vvOdn9slvIGtbdyWEY0OMEEBqIqAPCQBDFwCrBLDey/L4+GlgXDsjGKL/CZXk7Do0wDZkVKwX9dEX8DtdL8SKGh2NRCxBwZC18gRcDvdlN08mmOFtA9CAQwF+yNRqVLKgNSdiPPzFeenrr+5e8TBaQhT815sbB/FsSC7VdK6BBErqYgvy5qG2nI7ZkfaUV9TGteGiBXBTEqqxe7vqIufBCZFEKE41QTKinLfUQDF0lcvLWx1JVwzOZnp79oJmIx/Al+ugc/MhevbB3MV8J2FzCUwMe9Nfgo+QjjygMPTECYXvNjcOU4+gY/mwK/pArK3jPF3Xr3vKvI/iH5eDSQ6+f5MF5hPgMFBs5wzOCjApJoWPpMqGFDNUwAq5TeOlghJ2gVgM9h/WH9+rhYBz/AJA72Gh6+jJ+AZPhEAcLE6tKhr5ADYb8SXTNfI4V8bWgYAS2w74lv3WSocM7KmPTHhEaBMAqxJ/J5vEWPuXpY7r1YH92JnL4AOnpbaozoVAAAAAElFTkSuQmCC">
+<link rel="icon" type="image/svg+xml" sizes="any" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzFhNGM4YiIvPjxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0xMCA0SDIyQTQgNCAwIDAgMSAyNiA4VjEyQTQgNCAwIDAgMSAyMiAxNkgxNFYyOEgxMFpNMTQgOFYxMkgyMlY4Wk00IDE4SDE4VjIySDRaIi8+PC9zdmc+">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAATnRFWHRncC1zdmctc2hhMjU2AGU5YjNhMjllYWU0NzZlMmJlNmI5ZTBkMjNhZDNhY2M3MWQ2YmU4NDBmNzE0YzBkNGYyMzczODRmM2U3MjA1YjeDUlAEAAAC+0lEQVR42u3d32uNcRzA8e9Zy88OLVZsmEJygeZGooS44IgrV1xQK7nULuTG71K4obhZc7EbVnazlTQx2sX8muRHW2gOw2RbZzmYpXEntu/KFc9pr9df8PT07vOc8zzf5/ukyjKnAsQUOQWIA3EgDsSBOBAH4kAciANxgDgQB+JAHIgDcSAOxIE4EAeIA3EgDsSBOBAH4kAciANxgDgQB+JAHPwLxQV99G8bqxN+hIND33P5wdynwQ/9+dsPs9fvvXzR3V8opzdV0BvGJT+O0bI9Axca7tZdfeSywkgVs6af3Lfx1oXdq5fNEwcRC+fMqD+x4/jeDUVFKXEQsXtLZf3xHdOnThQHEauWzm08szM9ZYI4iFhQXlJzcFsCry/iSIQ1yyuOVq0XB2P8/shUJu3/izgS5EjVOnEQt2R+6fa1S8RB3J5MpTiIW7F4dkl6sjiISKVSm1YuEAdxyxfNEgdxZTPT4mCMOEqniYOkT47icXj2y7eeDglejlSSnmRyECz2QRyIA3GAOBAH4kAciANxIA7EgTgQB+IAcRCsBAuFu1lU/uuQyUHch768OIjr6RcHY00OcTCW9s734iCuqbVTHMTHxsfcF3EQcbHpYXATjNE6sr0NLc/EQcSx2pbg9jmjXb7+pKX9lTgY6UHHu+pz14IHb4zQ9S636/CV4eEf4uAPd552b95fN/D5W/BUlt/VNrYfqrmZwJkhjv/p+Zu+A+eb2550B+s5CL99xutsfdul5sfBYp9x7tcHAHv68q2Psjfud3W+7g1WggV7ggVrSBEH4gBxIA7EgTgQB0mQKsucCt5DDG6dmRyIA3EgDsSBOBAH4kAciAPEgTgQB+JAHIgDcRCsBAuFs8W91yFNDsSBOBAH4kAciANxIA4QB+JAHIgDcSAOxIE4EAfiQBwgDsSBOBAH4kAcBK9DYnIgDsQB4kAciANxIA7EgTgQB+JAHCAOxIE4EAfiQByIA3EgDsSBOEAciANxIA7EgTgQB+JAHIgDxMHf+gketKNI/AHGMAAAAABJRU5ErkJggg==">
 <!-- Скрипты работают: сразу, ещё до разбора страницы, помечаем корневой элемент
      классом js. По нему CSS прячет баннер «Здесь только предпросмотр» и, пока
      основной скрипт в конце файла не докачался, показывает «Загрузка…». Раньше
@@ -958,7 +968,7 @@ window.gpStarted = true;
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.196", дата:"2026-09-11", коммит:"98e26ed", сумма:"f006d0eda1"};
+const СБОРКА = {версия:"2.0.199", дата:"2026-09-12", коммит:"bb8c854", сумма:"eee8a48f70"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -14736,7 +14746,8 @@ function рисоватьКнопкиДеп(нх, с, пробл){
   const ss = $("#sticky-sum"), b = ss.querySelector("b"), sp = ss.querySelector("span"), есть = S.деп.сумма > 0;
   b.textContent = есть ? рубТочно(S.деп.сумма) : "Сумма появится ниже"; b.classList.toggle("dash", !есть);
   $("#sticky-go").classList.toggle("primary", есть);
-  sp.textContent = нх.length ? почему : [с ? с.наименование : "", S.деп.дело ? "дело № " + S.деп.дело.trim() : ""].filter(Boolean).join(" · ");
+  // номер дела в подписи панели не рвётся по дефису («дело № 2-⏎1234/2026» — снимок 390 px 11.09.2026)
+  sp.textContent = нх.length ? почему : [с ? с.наименование : "", S.деп.дело ? "дело № " + S.деп.дело.trim().replace(/(\d)-(?=\d)/g, "$1‑") : ""].filter(Boolean).join(" · ");
   sp.classList.toggle("need", !!нх.length);
 }
 /** Только для показа на листе: номер дела и СНИЛС не рвутся переносом по дефису, «№» и
