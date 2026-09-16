@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="build" content="2.0.223 2026-09-16 f785046 44e5a8c908">
+<meta name="build" content="2.0.225 2026-09-16 0f1a9b9 cb61e1fd6f">
 <meta name="color-scheme" content="light">   <!-- одна тема, светлая (решение Ивана 06.09.2026) -->
 <meta name="description" content="Расчёт госпошлины в суд и справка для оплаты: реквизиты, сумма, назначение платежа, QR-код по ГОСТ Р 56042-2014. Работает локально, данные хранятся на вашем устройстве.">
 <title>Госпошлина в суд — расчёт и справка для оплаты</title>
@@ -994,7 +994,7 @@ window.gpStarted = true;
 (function(){ const b = document.getElementById("nojs"); if(b) b.remove(); })();
 
 /** Сведения о сборке — подставляет build.py */
-const СБОРКА = {версия:"2.0.223", дата:"2026-09-16", коммит:"f785046", сумма:"44e5a8c908"};
+const СБОРКА = {версия:"2.0.225", дата:"2026-09-16", коммит:"0f1a9b9", сумма:"cb61e1fd6f"};
 
 /* ——— Глобальный баннер ошибок ———
    Раньше при ошибке в скрипте кнопки просто «умирали» без объяснений.
@@ -15776,6 +15776,9 @@ function применитьШаг(){
     const было = !el.hidden, надо = свой && н <= уровень;
     el.hidden = !надо;
     if(надо && !было && !мгновенно){ el.classList.remove("step-in"); void el.offsetWidth; el.classList.add("step-in"); }
+    // высота поля назначения считалась, пока блок был скрыт (scrollHeight 0 → 76 px), и на телефоне последняя
+    // строка пряталась до следующего действия (снимок 16.09.2026) — пересчитываем, когда блок показан
+    if(надо && !было) el.querySelectorAll("textarea").forEach(подогнатьВысоту);
     if(мгновенно) el.classList.remove("step-in");
   }
   // Заготовка справки стоит на месте будущего листа, пока считать нечего.
